@@ -1,0 +1,30 @@
+package StockTradingApp;
+
+class UIHelper {
+    public static void clearScreen() {
+        System.out.print("\033[H\033[2J");
+        System.out.flush();
+    }
+    
+    public static void tampilkanHeader(String judul) {
+        System.out.println("\n╔════════════════════════════════════════════════════════════════════════════════╗");
+        System.out.println("║" + centerText(judul, 80) + "║");
+        System.out.println("╚════════════════════════════════════════════════════════════════════════════════╝");
+    }
+    
+    public static void tampilkanSubHeader(String subjudul) {
+        System.out.println("\n┌────────────────────────────────────────────────────────────────────────────────┐");
+        System.out.println("│ " + subjudul);
+        System.out.println("└────────────────────────────────────────────────────────────────────────────────┘");
+    }
+    
+    public static String centerText(String text, int width) {
+        int padding = (width - text.length()) / 2;
+        return " ".repeat(padding) + text + " ".repeat(width - text.length() - padding);
+    }
+    
+    public static void pause() {
+        System.out.print("\n[Tekan ENTER untuk melanjutkan...]");
+        try { System.in.read(); } catch (Exception e) {}
+    }
+}
