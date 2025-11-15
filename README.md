@@ -15,6 +15,49 @@ NeoStock is a JavaFX-based desktop application that provides a simulated stock t
 *   **Guest Mode:** Allows users to view the stock market without creating an account.
 *   **Transaction History:** Users can view a history of their past transactions.
 
+## Project Structure
+
+```
+.
+├── bin/
+│   └── StockTradingApp/
+├── lib/
+│   ├── ... (JavaFX libraries)
+└── src/
+    └── StockTradingApp/
+        ├── Akun.java
+        ├── App.java
+        ├── CustomExceptions.java
+        ├── LaporanManager.java
+        ├── PasarSaham.java
+        ├── Portofolio.java
+        ├── Saham.java
+        ├── SistemAutentikasi.java
+        ├── SistemTradingSaham.java
+        ├── StockTradingApp.java
+        ├── Transaksi.java
+        ├── UIHelper.java
+        └── styles.css
+```
+
+*   **`src/`**: Contains all the Java source code for the application, as well as the CSS stylesheet.
+*   **`bin/`**: The output directory for the compiled Java class files.
+*   **`lib/`**: Contains the JavaFX libraries required to run the application.
+
+## Application Architecture
+
+The application is built using a monolithic architecture, with a clear separation of concerns between the UI and the back-end logic.
+
+*   **`StockTradingApp.java`**: The main class that launches the JavaFX application. It is responsible for creating the UI, handling user input, and coordinating the other classes.
+*   **`SistemAutentikasi.java`**: Handles user authentication, including registration and login. It stores user data in a `HashMap`.
+*   **`PasarSaham.java`**: Represents the stock market. It manages the list of available stocks and updates their prices periodically.
+*   **`Akun.java`**: Represents a user account. It stores the user's personal information, balance, and portfolio.
+*   **`Portofolio.java`**: Represents a user's stock portfolio. It keeps track of the stocks the user owns, the number of shares, and the purchase price.
+*   **`Saham.java`**: Represents a stock. It stores the stock's code, name, sector, and current price.
+*   **`Transaksi.java`**: Represents a transaction (buy or sell). It stores the details of the transaction, such as the stock, number of shares, and price.
+*   **`UIHelper.java`**: A utility class that provides helper methods for creating UI components. This class is not yet implemented.
+*   **`CustomExceptions.java`**: Contains custom exception classes used throughout the application.
+
 ## Getting Started
 
 To get a local copy up and running, follow these simple steps.
