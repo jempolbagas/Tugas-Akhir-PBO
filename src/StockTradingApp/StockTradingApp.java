@@ -642,4 +642,10 @@ public class StockTradingApp extends Application {
     public static void main(String[] args) {
         launch(args);
     }
+
+    @Override
+    public void stop() {
+        System.out.println("Application is closing. Saving data...");
+        auth.saveData();
+    }
 }
