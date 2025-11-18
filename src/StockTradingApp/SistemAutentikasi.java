@@ -1,6 +1,8 @@
 package StockTradingApp;
 
 import java.io.IOException;
+import com.google.gson.JsonSyntaxException;
+import java.io.File;
 
 class SistemAutentikasi {
     private java.util.HashMap<String, Akun> database;
@@ -11,9 +13,23 @@ class SistemAutentikasi {
         try {
             this.database = dataManager.loadData();
         } catch (java.io.FileNotFoundException e) {
-            UIHelper.showErrorAndExit("File data tidak ditemukan. Aplikasi akan ditutup.", e);
+            UIHelper.showNotification("File data tidak ditemukan. Membuat file baru.");
+            this.database = new java.util.HashMap<>();
+            saveData();
+        } catch (JsonSyntaxException e) {
+            UIHelper.showNotification("File data rusak. Membuat backup dan memulai dengan data baru.");
+            backupCorruptedData();
+            this.database = new java.util.HashMap<>();
         } catch (IOException e) {
-            UIHelper.showErrorAndExit("Gagal memuat data. File mungkin rusak.", e);
+            UIHelper.showErrorAndExit("Gagal memuat data karena kesalahan I/O.", e);
+        }
+    }
+
+    private void backupCorruptedData() {
+        File source = new File("neostock.json");
+        File dest = new File("neostock.json.corrupted." + System.currentTimeMillis());
+        if (source.exists()) {
+            source.renameTo(dest);
         }
     }
 

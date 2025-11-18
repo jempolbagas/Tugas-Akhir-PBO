@@ -40,4 +40,12 @@ class UIHelper {
         System.err.println("=====================================");
         System.exit(1);
     }
+
+    public static void showNotification(String message) {
+        System.out.println("\n=====================================");
+        System.out.println("           PEMBERITAHUAN          ");
+        System.out.println("=====================================");
+        System.out.println(message);
+        System.out.println("=====================================");
+    }
 }
