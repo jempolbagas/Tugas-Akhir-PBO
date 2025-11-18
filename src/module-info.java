@@ -3,6 +3,6 @@ module StockTradingApp {
     requires javafx.fxml;
     requires javafx.graphics;
 
-    exports stocktradingapp;
-    opens stocktradingapp to javafx.graphics, javafx.fxml;
+    exports StockTradingApp;
+    opens StockTradingApp to javafx.graphics, javafx.fxml;
 }
