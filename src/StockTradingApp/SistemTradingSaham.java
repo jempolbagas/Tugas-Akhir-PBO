@@ -34,6 +34,7 @@ public class SistemTradingSaham {
             }
         }
         
+        auth.saveData();
         System.out.println("\n╔════════════════════════════════════════════════════════════════════════════════╗");
         System.out.println("║        Terima kasih telah menggunakan Sistem Trading Saham Digital!           ║");
         System.out.println("╚════════════════════════════════════════════════════════════════════════════════╝\n");
@@ -290,7 +291,7 @@ public class SistemTradingSaham {
             
             if (konfirmasi.equalsIgnoreCase("Y")) {
                 akunAktif.beliSaham(saham, jumlahLembar);
-                
+                auth.saveData();
                 System.out.println("\n╔════════════════════════════════════════════════════════════════════════════════╗");
                 System.out.println("║                     ✓ PEMBELIAN BERHASIL!                                     ║");
                 System.out.println("╚════════════════════════════════════════════════════════════════════════════════╝");
@@ -400,7 +401,7 @@ public class SistemTradingSaham {
             
             if (konfirmasi.equalsIgnoreCase("Y")) {
                 akunAktif.jualSaham(saham, jumlah);
-                
+                auth.saveData();
                 System.out.println("\n╔════════════════════════════════════════════════════════════════════════════════╗");
                 System.out.println("║                     ✓ PENJUALAN BERHASIL!                                     ║");
                 System.out.println("╚════════════════════════════════════════════════════════════════════════════════╝");
@@ -529,7 +530,7 @@ public class SistemTradingSaham {
             }
             
             akunAktif.tambahSaldo(jumlah);
-            
+            auth.saveData();
             System.out.println("\n╔════════════════════════════════════════════════════════════════════════════════╗");
             System.out.println("║                     ✓ TOP UP BERHASIL!                                        ║");
             System.out.println("╚════════════════════════════════════════════════════════════════════════════════╝");

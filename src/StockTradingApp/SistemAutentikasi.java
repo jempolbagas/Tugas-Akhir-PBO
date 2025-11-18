@@ -1,10 +1,28 @@
 package StockTradingApp;
 
+import java.io.IOException;
+
 class SistemAutentikasi {
     private java.util.HashMap<String, Akun> database;
+    private DataManager dataManager;
     
     public SistemAutentikasi() {
-        this.database = new java.util.HashMap<>();
+        this.dataManager = new DataManager();
+        try {
+            this.database = dataManager.loadData();
+        } catch (java.io.FileNotFoundException e) {
+            UIHelper.showErrorAndExit("File data tidak ditemukan. Aplikasi akan ditutup.", e);
+        } catch (IOException e) {
+            UIHelper.showErrorAndExit("Gagal memuat data. File mungkin rusak.", e);
+        }
+    }
+
+    public void saveData() {
+        try {
+            dataManager.saveData(database);
+        } catch (IOException e) {
+            UIHelper.showErrorAndExit("Gagal menyimpan data.", e);
+        }
     }
     
     public void buatAkun(String username, String password, String namaLengkap, 
@@ -23,6 +41,7 @@ class SistemAutentikasi {
         
         Akun akunBaru = new Akun(username, password, namaLengkap, email, saldoAwal);
         database.put(username, akunBaru);
+        saveData();
     }
     
     public Akun login(String username, String password) 
