@@ -1,6 +1,6 @@
 package StockTradingApp;
 
-class Portfolio implements java.io.Serializable {
+class Portfolio {
     private String kodeSaham;
     private String namaSaham;
     private int jumlah;

@@ -1,6 +1,6 @@
 package StockTradingApp;
 
-class Transaksi implements java.io.Serializable {
+class Transaksi {
     private String idTransaksi;
     private String jenis; // BUY atau SELL
     private String kodeSaham;

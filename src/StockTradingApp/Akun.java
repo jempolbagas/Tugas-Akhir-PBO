@@ -1,6 +1,6 @@
 package StockTradingApp;
 
-class Akun implements java.io.Serializable {
+class Akun {
     private String username;
     private String password;
     private String namaLengkap;
