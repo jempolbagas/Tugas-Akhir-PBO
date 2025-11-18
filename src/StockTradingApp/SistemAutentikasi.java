@@ -2,9 +2,16 @@ package StockTradingApp;
 
 class SistemAutentikasi {
     private java.util.HashMap<String, Akun> database;
-    
+    private static final String DATA_FILE = "neostock.dat";
+
+    @SuppressWarnings("unchecked")
     public SistemAutentikasi() {
-        this.database = new java.util.HashMap<>();
+        Object loadedData = DataManager.loadData(DATA_FILE);
+        if (loadedData != null && loadedData instanceof java.util.HashMap) {
+            this.database = (java.util.HashMap<String, Akun>) loadedData;
+        } else {
+            this.database = new java.util.HashMap<>();
+        }
     }
     
     public void buatAkun(String username, String password, String namaLengkap, 
@@ -23,6 +30,7 @@ class SistemAutentikasi {
         
         Akun akunBaru = new Akun(username, password, namaLengkap, email, saldoAwal);
         database.put(username, akunBaru);
+        DataManager.saveData(database, DATA_FILE);
     }
     
     public Akun login(String username, String password) 
@@ -41,5 +49,9 @@ class SistemAutentikasi {
     
     public boolean isUsernameExist(String username) {
         return database.containsKey(username);
+    }
+
+    public void saveData() {
+        DataManager.saveData(database, DATA_FILE);
     }
 }
