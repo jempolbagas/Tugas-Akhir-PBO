@@ -324,8 +324,6 @@ public class TradingController {
         LaporanManager.exportLaporan(akunAktif, pasar);
     }
 
-
-
     private void pengaturanAkun() {
         view.pengaturanAkun(akunAktif);
     }
