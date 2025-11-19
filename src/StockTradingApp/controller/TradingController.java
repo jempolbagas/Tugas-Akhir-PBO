@@ -232,7 +232,7 @@ public class TradingController {
             return;
         }
         if (akunAktif.getPortfolio().isEmpty()) {
-            view.displayError("Portfolio Anda kosong. Belum ada saham yang bisa dijual.");
+            view.displayError("⚠️  Portfolio Anda kosong. Belum ada saham yang bisa dijual.");
             return;
         }
 
