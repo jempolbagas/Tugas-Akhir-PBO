@@ -2,11 +2,25 @@ package StockTradingApp;
 
 public class SistemTradingSaham {
     private static java.util.Scanner scanner = new java.util.Scanner(System.in);
-    private static SistemAutentikasi auth = new SistemAutentikasi();
+    private static SistemAutentikasi auth;
     private static PasarSaham pasar = new PasarSaham();
     private static Akun akunAktif = null;
     
     public static void main(String[] args) {
+        try {
+            auth = new SistemAutentikasi();
+            java.util.List<String> notifications = auth.getNotifications();
+            if (!notifications.isEmpty()) {
+                for (String notification : notifications) {
+                    UIHelper.showNotification(notification);
+                }
+                UIHelper.pause();
+            }
+        } catch (DatabaseLoadException | DatabaseSaveException e) {
+            UIHelper.showErrorAndExit("Gagal memuat data penting.", e);
+            return; // Exit if auth fails
+        }
+
         // Thread untuk update harga otomatis setiap 10 detik
         Thread updateThread = new Thread(() -> {
             while (true) {
@@ -34,7 +48,11 @@ public class SistemTradingSaham {
             }
         }
         
-        auth.saveData();
+        try {
+            auth.saveData();
+        } catch (DatabaseSaveException e) {
+            UIHelper.showErrorAndExit("Gagal menyimpan data saat keluar.", e);
+        }
         System.out.println("\n╔════════════════════════════════════════════════════════════════════════════════╗");
         System.out.println("║        Terima kasih telah menggunakan Sistem Trading Saham Digital!           ║");
         System.out.println("╚════════════════════════════════════════════════════════════════════════════════╝\n");
@@ -116,6 +134,8 @@ public class SistemTradingSaham {
             System.out.println("\nSelamat! Akun Anda telah berhasil dibuat.");
             System.out.println("Silakan login untuk mulai trading.");
             
+        } catch (DatabaseSaveException e) {
+            System.out.println("\n✗ Gagal menyimpan akun baru: " + e.getMessage());
         } catch (Exception e) {
             System.out.println("\n✗ " + e.getMessage());
         }
@@ -291,7 +311,11 @@ public class SistemTradingSaham {
             
             if (konfirmasi.equalsIgnoreCase("Y")) {
                 akunAktif.beliSaham(saham, jumlahLembar);
-                auth.saveData();
+                try {
+                    auth.saveData();
+                } catch (DatabaseSaveException e) {
+                    System.out.println("\n✗ Gagal menyimpan transaksi: " + e.getMessage());
+                }
                 System.out.println("\n╔════════════════════════════════════════════════════════════════════════════════╗");
                 System.out.println("║                     ✓ PEMBELIAN BERHASIL!                                     ║");
                 System.out.println("╚════════════════════════════════════════════════════════════════════════════════╝");
@@ -401,7 +425,11 @@ public class SistemTradingSaham {
             
             if (konfirmasi.equalsIgnoreCase("Y")) {
                 akunAktif.jualSaham(saham, jumlah);
-                auth.saveData();
+                try {
+                    auth.saveData();
+                } catch (DatabaseSaveException e) {
+                    System.out.println("\n✗ Gagal menyimpan transaksi: " + e.getMessage());
+                }
                 System.out.println("\n╔════════════════════════════════════════════════════════════════════════════════╗");
                 System.out.println("║                     ✓ PENJUALAN BERHASIL!                                     ║");
                 System.out.println("╚════════════════════════════════════════════════════════════════════════════════╝");
@@ -530,7 +558,11 @@ public class SistemTradingSaham {
             }
             
             akunAktif.tambahSaldo(jumlah);
-            auth.saveData();
+            try {
+                auth.saveData();
+            } catch (DatabaseSaveException e) {
+                System.out.println("\n✗ Gagal menyimpan transaksi: " + e.getMessage());
+            }
             System.out.println("\n╔════════════════════════════════════════════════════════════════════════════════╗");
             System.out.println("║                     ✓ TOP UP BERHASIL!                                        ║");
             System.out.println("╚════════════════════════════════════════════════════════════════════════════════╝");
