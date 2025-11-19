@@ -183,7 +183,7 @@ public class TradingController {
 
     private void beliSaham() {
         if (!pasar.isPasarBuka()) {
-            view.displayError("Pasar sedang tutup! Transaksi tidak dapat dilakukan.");
+            view.displayError("⚠️  Pasar sedang tutup! Transaksi tidak dapat dilakukan.");
             return;
         }
 
