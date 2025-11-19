@@ -27,4 +27,25 @@ class UIHelper {
         System.out.print("\n[Tekan ENTER untuk melanjutkan...]");
         try { System.in.read(); } catch (Exception e) {}
     }
+
+    public static void showErrorAndExit(String message, Exception e) {
+        System.err.println("=====================================");
+        System.err.println("           ERROR KRITIS          ");
+        System.err.println("=====================================");
+        System.err.println(message);
+        if (e != null) {
+            System.err.println("Detail error: " + e.getMessage());
+        }
+        System.err.println("Aplikasi akan ditutup.");
+        System.err.println("=====================================");
+        System.exit(1);
+    }
+
+    public static void showNotification(String message) {
+        System.out.println("\n=====================================");
+        System.out.println("           PEMBERITAHUAN          ");
+        System.out.println("=====================================");
+        System.out.println(message);
+        System.out.println("=====================================");
+    }
 }
