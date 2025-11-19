@@ -228,7 +228,7 @@ public class TradingController {
 
     private void jualSaham() {
         if (!pasar.isPasarBuka()) {
-            view.displayError("Pasar sedang tutup! Transaksi tidak dapat dilakukan.");
+            view.displayError("⚠️  Pasar sedang tutup! Transaksi tidak dapat dilakukan.");
             return;
         }
         if (akunAktif.getPortfolio().isEmpty()) {
