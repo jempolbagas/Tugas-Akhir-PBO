@@ -315,6 +315,7 @@ public class SistemTradingSaham {
                     auth.saveData();
                 } catch (DatabaseSaveException e) {
                     System.out.println("\n✗ Gagal menyimpan transaksi: " + e.getMessage());
+                    akunAktif.rollbackLastTransaction();
                 }
                 System.out.println("\n╔════════════════════════════════════════════════════════════════════════════════╗");
                 System.out.println("║                     ✓ PEMBELIAN BERHASIL!                                     ║");
@@ -429,6 +430,7 @@ public class SistemTradingSaham {
                     auth.saveData();
                 } catch (DatabaseSaveException e) {
                     System.out.println("\n✗ Gagal menyimpan transaksi: " + e.getMessage());
+                    akunAktif.rollbackLastTransaction();
                 }
                 System.out.println("\n╔════════════════════════════════════════════════════════════════════════════════╗");
                 System.out.println("║                     ✓ PENJUALAN BERHASIL!                                     ║");
@@ -562,6 +564,7 @@ public class SistemTradingSaham {
                 auth.saveData();
             } catch (DatabaseSaveException e) {
                 System.out.println("\n✗ Gagal menyimpan transaksi: " + e.getMessage());
+                akunAktif.rollbackLastTransaction();
             }
             System.out.println("\n╔════════════════════════════════════════════════════════════════════════════════╗");
             System.out.println("║                     ✓ TOP UP BERHASIL!                                        ║");

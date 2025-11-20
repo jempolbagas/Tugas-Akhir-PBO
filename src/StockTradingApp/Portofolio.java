@@ -36,6 +36,11 @@ class Portfolio {
         jumlah -= pengurangan;
         totalModal = jumlah * hargaBeli;
     }
+
+    public void tambahJumlahTanpaAvg(int tambahan) {
+        jumlah += tambahan;
+        totalModal = jumlah * hargaBeli;
+    }
     
     public double hitungNilaiSekarang(double hargaSekarang) {
         return jumlah * hargaSekarang;
