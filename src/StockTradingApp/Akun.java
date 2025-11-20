@@ -83,38 +83,23 @@ class Akun {
         riwayatTransaksi.add(new Transaksi("SELL", saham.getKode(), 
             saham.getNamaSaham(), jumlah, saham.getHargaSekarang()));
     }
-
-    public void rollbackLastTransaction() {
-        if (riwayatTransaksi.isEmpty()) {
-            return;
+    
+    // Helper methods for rollback
+    public void setSaldo(double saldo) {
+        this.saldo = saldo;
+    }
+    
+    public void removeLastTransaction() {
+        if (!riwayatTransaksi.isEmpty()) {
+            riwayatTransaksi.remove(riwayatTransaksi.size() - 1);
         }
-
-        Transaksi lastTx = riwayatTransaksi.remove(riwayatTransaksi.size() - 1);
-
-        if ("BUY".equals(lastTx.getJenis())) {
-            // Rollback a buy transaction
-            saldo += lastTx.getTotal();
-            Portfolio port = portfolio.get(lastTx.getKodeSaham());
-            if (port != null) {
-                port.kurangiJumlah(lastTx.getJumlah());
-                if (port.getJumlah() == 0) {
-                    portfolio.remove(lastTx.getKodeSaham());
-                }
-            }
-        } else if ("SELL".equals(lastTx.getJenis())) {
-            // Rollback a sell transaction
-            saldo -= lastTx.getTotal();
-            Portfolio port = portfolio.get(lastTx.getKodeSaham());
-            if (port != null) {
-                port.tambahJumlahTanpaAvg(lastTx.getJumlah());
-            } else {
-                // This case is unlikely if the logic is correct, but we handle it
-                // We don't have the original buy price here, so we can't perfectly restore it.
-                // This is a limitation of the current design.
-            }
-        } else if ("TOPUP".equals(lastTx.getJenis())) {
-            // Rollback a top-up
-            saldo -= lastTx.getTotal();
+    }
+    
+    public void setPortfolioItem(String kode, Portfolio portfolio) {
+        if (portfolio == null) {
+            this.portfolio.remove(kode);
+        } else {
+            this.portfolio.put(kode, portfolio);
         }
     }
 }
