@@ -25,6 +25,7 @@ class Transaksi {
     public String getJenis() { return jenis; }
     public String getKodeSaham() { return kodeSaham; }
     public double getTotal() { return total; }
+    public int getJumlah() { return jumlah; }
     
     @Override
     public String toString() {

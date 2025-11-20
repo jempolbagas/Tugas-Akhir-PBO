@@ -16,7 +16,7 @@ import java.util.ArrayList;
 public class StockTradingApp extends Application {
     private Stage primaryStage;
     private BorderPane rootLayout;
-    private SistemAutentikasi auth = new SistemAutentikasi();
+    private SistemAutentikasi auth;
     private PasarSaham pasar = new PasarSaham();
     private Akun akunAktif = null;
     private Label balanceLabel;
@@ -26,6 +26,18 @@ public class StockTradingApp extends Application {
         this.primaryStage = primaryStage;
         this.primaryStage.setTitle("NeoStock - Futuristic Trading Platform");
         
+        try {
+            auth = new SistemAutentikasi();
+            // Show notifications if any
+            java.util.List<String> notifications = auth.getNotifications();
+            if (!notifications.isEmpty()) {
+                showAlert("System Notification", String.join("\n", notifications), Alert.AlertType.INFORMATION);
+            }
+        } catch (DatabaseLoadException | DatabaseSaveException e) {
+            showAlert("Critical Error", "Failed to load or save data: " + e.getMessage(), Alert.AlertType.ERROR);
+            // Optionally, we can decide to exit or disable features. For now, we just show an error.
+        }
+
         initRootLayout();
         showSplashScreen();
         
@@ -197,6 +209,8 @@ public class StockTradingApp extends Application {
                 showAlert("Quantum Success", "Account activated! Welcome to Neo-Stock.", Alert.AlertType.INFORMATION);
                 showMainMenu();
                 
+            } catch (DatabaseSaveException ex) {
+                showAlert("Quantum Error", "Failed to save account: " + ex.getMessage(), Alert.AlertType.ERROR);
             } catch (Exception ex) {
                 showAlert("Quantum Error", ex.getMessage(), Alert.AlertType.ERROR);
             }

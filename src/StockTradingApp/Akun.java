@@ -34,6 +34,7 @@ class Akun {
     public void tambahSaldo(double jumlah) {
         if (jumlah <= 0) throw new IllegalArgumentException("Jumlah harus positif!");
         this.saldo += jumlah;
+        riwayatTransaksi.add(new Transaksi("TOPUP", "-", "-", 0, jumlah));
     }
     
     public void beliSaham(Saham saham, int jumlah) throws SaldoTidakCukupException {
@@ -81,5 +82,24 @@ class Akun {
         // Catat transaksi
         riwayatTransaksi.add(new Transaksi("SELL", saham.getKode(), 
             saham.getNamaSaham(), jumlah, saham.getHargaSekarang()));
+    }
+    
+    // Helper methods for rollback
+    public void setSaldo(double saldo) {
+        this.saldo = saldo;
+    }
+    
+    public void removeLastTransaction() {
+        if (!riwayatTransaksi.isEmpty()) {
+            riwayatTransaksi.remove(riwayatTransaksi.size() - 1);
+        }
+    }
+    
+    public void setPortfolioItem(String kode, Portfolio portfolio) {
+        if (portfolio == null) {
+            this.portfolio.remove(kode);
+        } else {
+            this.portfolio.put(kode, portfolio);
+        }
     }
 }

@@ -36,6 +36,11 @@ class Portfolio {
         jumlah -= pengurangan;
         totalModal = jumlah * hargaBeli;
     }
+
+    public void tambahJumlahTanpaAvg(int tambahan) {
+        jumlah += tambahan;
+        totalModal = jumlah * hargaBeli;
+    }
     
     public double hitungNilaiSekarang(double hargaSekarang) {
         return jumlah * hargaSekarang;
@@ -47,5 +52,18 @@ class Portfolio {
     
     public double hitungPersentaseKeuntungan(double hargaSekarang) {
         return (hitungKeuntungan(hargaSekarang) / totalModal) * 100;
+    }
+    
+    // Helper methods for rollback
+    public void setJumlah(int jumlah) {
+        this.jumlah = jumlah;
+    }
+    
+    public void setHargaBeli(double hargaBeli) {
+        this.hargaBeli = hargaBeli;
+    }
+    
+    public void setTotalModal(double totalModal) {
+        this.totalModal = totalModal;
     }
 }
