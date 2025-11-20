@@ -34,6 +34,7 @@ class Akun {
     public void tambahSaldo(double jumlah) {
         if (jumlah <= 0) throw new IllegalArgumentException("Jumlah harus positif!");
         this.saldo += jumlah;
+        riwayatTransaksi.add(new Transaksi("TOPUP", "-", "-", 0, jumlah));
     }
     
     public void beliSaham(Saham saham, int jumlah) throws SaldoTidakCukupException {
