@@ -48,4 +48,17 @@ class Portfolio {
     public double hitungPersentaseKeuntungan(double hargaSekarang) {
         return (hitungKeuntungan(hargaSekarang) / totalModal) * 100;
     }
+    
+    // Helper methods for rollback
+    public void setJumlah(int jumlah) {
+        this.jumlah = jumlah;
+    }
+    
+    public void setHargaBeli(double hargaBeli) {
+        this.hargaBeli = hargaBeli;
+    }
+    
+    public void setTotalModal(double totalModal) {
+        this.totalModal = totalModal;
+    }
 }
