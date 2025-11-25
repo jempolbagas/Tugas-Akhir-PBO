@@ -71,7 +71,7 @@ public class TradingService {
             // Assuming quantity is sheets
 
             if (quantity <= 0) {
-                 return new TradeResult(false, "Jumlah harus positif!", akun);
+                return new TradeResult(false, "Jumlah harus positif!", akun);
             }
 
             // Snapshot for rollback
