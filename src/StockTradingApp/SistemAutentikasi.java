@@ -7,21 +7,24 @@ import java.io.File;
 class SistemAutentikasi {
     private java.util.HashMap<String, Akun> database;
     private DataManager dataManager;
+    private java.util.List<String> notifications;
     
-    public SistemAutentikasi() {
+    public SistemAutentikasi() throws DatabaseLoadException, DatabaseSaveException {
         this.dataManager = new DataManager();
+        this.notifications = new java.util.ArrayList<>();
         try {
             this.database = dataManager.loadData();
         } catch (java.io.FileNotFoundException e) {
-            UIHelper.showNotification("File data tidak ditemukan. Membuat file baru.");
+            notifications.add("File data tidak ditemukan. Membuat file baru.");
             this.database = new java.util.HashMap<>();
             saveData();
         } catch (JsonSyntaxException e) {
-            UIHelper.showNotification("File data rusak. Membuat backup dan memulai dengan data baru.");
+            notifications.add("File data rusak. Membuat backup dan memulai dengan data baru.");
             backupCorruptedData();
             this.database = new java.util.HashMap<>();
+            saveData();
         } catch (IOException e) {
-            UIHelper.showErrorAndExit("Gagal memuat data karena kesalahan I/O.", e);
+            throw new DatabaseLoadException("Gagal memuat data karena kesalahan I/O.", e);
         }
     }
 
@@ -33,11 +36,11 @@ class SistemAutentikasi {
         }
     }
 
-    public void saveData() {
+    public void saveData() throws DatabaseSaveException {
         try {
             dataManager.saveData(database);
         } catch (IOException e) {
-            UIHelper.showErrorAndExit("Gagal menyimpan data.", e);
+            throw new DatabaseSaveException("Gagal menyimpan data.", e);
         }
     }
     
@@ -76,5 +79,11 @@ class SistemAutentikasi {
     
     public boolean isUsernameExist(String username) {
         return database.containsKey(username);
+    }
+
+    public java.util.List<String> getNotifications() {
+        java.util.List<String> currentNotifications = new java.util.ArrayList<>(notifications);
+        notifications.clear();
+        return currentNotifications;
     }
 }

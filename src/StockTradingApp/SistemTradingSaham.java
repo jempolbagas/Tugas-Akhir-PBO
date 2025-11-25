@@ -2,11 +2,25 @@ package StockTradingApp;
 
 public class SistemTradingSaham {
     private static java.util.Scanner scanner = new java.util.Scanner(System.in);
-    private static SistemAutentikasi auth = new SistemAutentikasi();
+    private static SistemAutentikasi auth;
     private static PasarSaham pasar = new PasarSaham();
     private static Akun akunAktif = null;
     
     public static void main(String[] args) {
+        try {
+            auth = new SistemAutentikasi();
+            java.util.List<String> notifications = auth.getNotifications();
+            if (!notifications.isEmpty()) {
+                for (String notification : notifications) {
+                    UIHelper.showNotification(notification);
+                }
+                UIHelper.pause();
+            }
+        } catch (DatabaseLoadException | DatabaseSaveException e) {
+            UIHelper.showErrorAndExit("Gagal memuat data penting.", e);
+            return; // Exit if auth fails
+        }
+
         // Thread untuk update harga otomatis setiap 10 detik
         Thread updateThread = new Thread(() -> {
             while (true) {
@@ -34,7 +48,11 @@ public class SistemTradingSaham {
             }
         }
         
-        auth.saveData();
+        try {
+            auth.saveData();
+        } catch (DatabaseSaveException e) {
+            UIHelper.showErrorAndExit("Gagal menyimpan data saat keluar.", e);
+        }
         System.out.println("\n╔════════════════════════════════════════════════════════════════════════════════╗");
         System.out.println("║        Terima kasih telah menggunakan Sistem Trading Saham Digital!           ║");
         System.out.println("╚════════════════════════════════════════════════════════════════════════════════╝\n");
@@ -116,6 +134,8 @@ public class SistemTradingSaham {
             System.out.println("\nSelamat! Akun Anda telah berhasil dibuat.");
             System.out.println("Silakan login untuk mulai trading.");
             
+        } catch (DatabaseSaveException e) {
+            System.out.println("\n✗ Gagal menyimpan akun baru: " + e.getMessage());
         } catch (Exception e) {
             System.out.println("\n✗ " + e.getMessage());
         }
@@ -290,13 +310,29 @@ public class SistemTradingSaham {
             String konfirmasi = scanner.nextLine();
             
             if (konfirmasi.equalsIgnoreCase("Y")) {
+                // Save state before transaction for potential rollback
+                double saldoSebelum = akunAktif.getSaldo();
+                Portfolio portfolioSebelum = akunAktif.getPortfolio().get(saham.getKode());
+                int jumlahPortfolioSebelum = portfolioSebelum != null ? portfolioSebelum.getJumlah() : 0;
+                double hargaBeliSebelum = portfolioSebelum != null ? portfolioSebelum.getHargaBeli() : 0;
+                double totalModalSebelum = portfolioSebelum != null ? portfolioSebelum.getTotalModal() : 0;
+                int ukuranRiwayatSebelum = akunAktif.getRiwayatTransaksi().size();
+                
                 akunAktif.beliSaham(saham, jumlahLembar);
-                auth.saveData();
-                System.out.println("\n╔════════════════════════════════════════════════════════════════════════════════╗");
-                System.out.println("║                     ✓ PEMBELIAN BERHASIL!                                     ║");
-                System.out.println("╚════════════════════════════════════════════════════════════════════════════════╝");
-                System.out.println("\nAnda telah membeli " + jumlahLembar + " lembar saham " + saham.getKode());
-                System.out.println("Saldo tersisa: Rp " + String.format("%,15.2f", akunAktif.getSaldo()));
+                try {
+                    auth.saveData();
+                    System.out.println("\n╔════════════════════════════════════════════════════════════════════════════════╗");
+                    System.out.println("║                     ✓ PEMBELIAN BERHASIL!                                     ║");
+                    System.out.println("╚════════════════════════════════════════════════════════════════════════════════╝");
+                    System.out.println("\nAnda telah membeli " + jumlahLembar + " lembar saham " + saham.getKode());
+                    System.out.println("Saldo tersisa: Rp " + String.format("%,15.2f", akunAktif.getSaldo()));
+                } catch (DatabaseSaveException e) {
+                    // Rollback transaction
+                    rollbackBeliSaham(saham, saldoSebelum, jumlahPortfolioSebelum, 
+                                     hargaBeliSebelum, totalModalSebelum, ukuranRiwayatSebelum);
+                    System.out.println("\n✗ Gagal menyimpan transaksi: " + e.getMessage());
+                    System.out.println("✗ Transaksi dibatalkan dan telah di-rollback.");
+                }
             } else {
                 System.out.println("\n✗ Pembelian dibatalkan.");
             }
@@ -400,18 +436,34 @@ public class SistemTradingSaham {
             String konfirmasi = scanner.nextLine();
             
             if (konfirmasi.equalsIgnoreCase("Y")) {
-                akunAktif.jualSaham(saham, jumlah);
-                auth.saveData();
-                System.out.println("\n╔════════════════════════════════════════════════════════════════════════════════╗");
-                System.out.println("║                     ✓ PENJUALAN BERHASIL!                                     ║");
-                System.out.println("╚════════════════════════════════════════════════════════════════════════════════╝");
-                System.out.println("\nAnda telah menjual " + jumlah + " lembar saham " + saham.getKode());
-                System.out.println("Saldo Anda sekarang: Rp " + String.format("%,15.2f", akunAktif.getSaldo()));
+                // Save state before transaction for potential rollback
+                double saldoSebelum = akunAktif.getSaldo();
+                Portfolio portfolioSebelum = akunAktif.getPortfolio().get(saham.getKode());
+                int jumlahPortfolioSebelum = portfolioSebelum.getJumlah();
+                double hargaBeliSebelum = portfolioSebelum.getHargaBeli();
+                double totalModalSebelum = portfolioSebelum.getTotalModal();
+                int ukuranRiwayatSebelum = akunAktif.getRiwayatTransaksi().size();
                 
-                if (profit >= 0) {
-                    System.out.println("🎉 Selamat! Anda mendapat profit: Rp " + String.format("%,12.2f", profit));
-                } else {
-                    System.out.println("📉 Anda mengalami loss: Rp " + String.format("%,12.2f", Math.abs(profit)));
+                akunAktif.jualSaham(saham, jumlah);
+                try {
+                    auth.saveData();
+                    System.out.println("\n╔════════════════════════════════════════════════════════════════════════════════╗");
+                    System.out.println("║                     ✓ PENJUALAN BERHASIL!                                     ║");
+                    System.out.println("╚════════════════════════════════════════════════════════════════════════════════╝");
+                    System.out.println("\nAnda telah menjual " + jumlah + " lembar saham " + saham.getKode());
+                    System.out.println("Saldo Anda sekarang: Rp " + String.format("%,15.2f", akunAktif.getSaldo()));
+                    
+                    if (profit >= 0) {
+                        System.out.println("🎉 Selamat! Anda mendapat profit: Rp " + String.format("%,12.2f", profit));
+                    } else {
+                        System.out.println("📉 Anda mengalami loss: Rp " + String.format("%,12.2f", Math.abs(profit)));
+                    }
+                } catch (DatabaseSaveException e) {
+                    // Rollback transaction
+                    rollbackJualSaham(saham, saldoSebelum, jumlahPortfolioSebelum, 
+                                     hargaBeliSebelum, totalModalSebelum, ukuranRiwayatSebelum);
+                    System.out.println("\n✗ Gagal menyimpan transaksi: " + e.getMessage());
+                    System.out.println("✗ Transaksi dibatalkan dan telah di-rollback.");
                 }
             } else {
                 System.out.println("\n✗ Penjualan dibatalkan.");
@@ -529,13 +581,23 @@ public class SistemTradingSaham {
                 return;
             }
             
+            // Save state before transaction for potential rollback
+            double saldoSebelum = akunAktif.getSaldo();
+            
             akunAktif.tambahSaldo(jumlah);
-            auth.saveData();
-            System.out.println("\n╔════════════════════════════════════════════════════════════════════════════════╗");
-            System.out.println("║                     ✓ TOP UP BERHASIL!                                        ║");
-            System.out.println("╚════════════════════════════════════════════════════════════════════════════════╝");
-            System.out.println("\nJumlah top up  : Rp " + String.format("%,15.2f", jumlah));
-            System.out.println("Saldo sekarang : Rp " + String.format("%,15.2f", akunAktif.getSaldo()));
+            try {
+                auth.saveData();
+                System.out.println("\n╔════════════════════════════════════════════════════════════════════════════════╗");
+                System.out.println("║                     ✓ TOP UP BERHASIL!                                        ║");
+                System.out.println("╚════════════════════════════════════════════════════════════════════════════════╝");
+                System.out.println("\nJumlah top up  : Rp " + String.format("%,15.2f", jumlah));
+                System.out.println("Saldo sekarang : Rp " + String.format("%,15.2f", akunAktif.getSaldo()));
+            } catch (DatabaseSaveException e) {
+                // Rollback transaction
+                rollbackTambahSaldo(saldoSebelum);
+                System.out.println("\n✗ Gagal menyimpan transaksi: " + e.getMessage());
+                System.out.println("✗ Transaksi dibatalkan dan telah di-rollback.");
+            }
             
         } catch (NumberFormatException e) {
             System.out.println("\n✗ Input tidak valid!");
@@ -582,5 +644,65 @@ public class SistemTradingSaham {
         System.out.println("╚════════════════════════════════════════════════════════════════════════════════╝");
         System.out.println("\nSampai jumpa, " + akunAktif.getNamaLengkap() + "!");
         akunAktif = null;
+    }
+    
+    // Rollback helper methods
+    private static void rollbackBeliSaham(Saham saham, double saldoSebelum, 
+                                          int jumlahPortfolioSebelum, double hargaBeliSebelum, 
+                                          double totalModalSebelum, int ukuranRiwayatSebelum) {
+        // Restore saldo
+        akunAktif.setSaldo(saldoSebelum);
+        
+        // Restore portfolio
+        if (jumlahPortfolioSebelum == 0) {
+            // Portfolio didn't exist before, remove it
+            akunAktif.setPortfolioItem(saham.getKode(), null);
+        } else {
+            // Portfolio existed, restore to previous state
+            Portfolio port = akunAktif.getPortfolio().get(saham.getKode());
+            if (port != null) {
+                port.setJumlah(jumlahPortfolioSebelum);
+                port.setHargaBeli(hargaBeliSebelum);
+                port.setTotalModal(totalModalSebelum);
+            }
+        }
+        
+        // Remove the transaction that was added
+        if (akunAktif.getRiwayatTransaksi().size() > ukuranRiwayatSebelum) {
+            akunAktif.removeLastTransaction();
+        }
+    }
+    
+    private static void rollbackJualSaham(Saham saham, double saldoSebelum, 
+                                          int jumlahPortfolioSebelum, double hargaBeliSebelum, 
+                                          double totalModalSebelum, int ukuranRiwayatSebelum) {
+        // Restore saldo
+        akunAktif.setSaldo(saldoSebelum);
+        
+        // Restore portfolio
+        Portfolio port = akunAktif.getPortfolio().get(saham.getKode());
+        if (port == null) {
+            // Portfolio was removed, recreate it
+            akunAktif.setPortfolioItem(saham.getKode(), 
+                new Portfolio(saham.getKode(), saham.getNamaSaham(), 
+                             jumlahPortfolioSebelum, hargaBeliSebelum));
+            Portfolio restoredPort = akunAktif.getPortfolio().get(saham.getKode());
+            restoredPort.setTotalModal(totalModalSebelum);
+        } else {
+            // Portfolio still exists, restore to previous state
+            port.setJumlah(jumlahPortfolioSebelum);
+            port.setHargaBeli(hargaBeliSebelum);
+            port.setTotalModal(totalModalSebelum);
+        }
+        
+        // Remove the transaction that was added
+        if (akunAktif.getRiwayatTransaksi().size() > ukuranRiwayatSebelum) {
+            akunAktif.removeLastTransaction();
+        }
+    }
+    
+    private static void rollbackTambahSaldo(double saldoSebelum) {
+        // Simply restore the saldo
+        akunAktif.setSaldo(saldoSebelum);
     }
 }

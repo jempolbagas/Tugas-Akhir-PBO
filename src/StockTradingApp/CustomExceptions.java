@@ -6,6 +6,18 @@ class SaldoTidakCukupException extends Exception {
     }
 }
 
+class DatabaseLoadException extends Exception {
+    public DatabaseLoadException(String message, Throwable cause) {
+        super(message, cause);
+    }
+}
+
+class DatabaseSaveException extends Exception {
+    public DatabaseSaveException(String message, Throwable cause) {
+        super(message, cause);
+    }
+}
+
 class AkunTidakDitemukanException extends Exception {
     public AkunTidakDitemukanException(String message) {
         super(message);
