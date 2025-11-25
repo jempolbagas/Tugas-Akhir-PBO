@@ -22,6 +22,7 @@ class SistemAutentikasi {
             notifications.add("File data rusak. Membuat backup dan memulai dengan data baru.");
             backupCorruptedData();
             this.database = new java.util.HashMap<>();
+            saveData();
         } catch (IOException e) {
             throw new DatabaseLoadException("Gagal memuat data karena kesalahan I/O.", e);
         }
@@ -44,7 +45,7 @@ class SistemAutentikasi {
     }
     
     public void buatAkun(String username, String password, String namaLengkap, 
-                         String email, double saldoAwal) throws Exception, DatabaseSaveException {
+                         String email, double saldoAwal) throws Exception {
         if (database.containsKey(username)) {
             throw new Exception("Username sudah digunakan!");
         }
