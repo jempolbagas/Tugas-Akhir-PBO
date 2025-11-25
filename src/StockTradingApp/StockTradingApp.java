@@ -46,7 +46,9 @@ public class StockTradingApp extends Application {
         showSplashScreen();
         
         // Start background price updates
-        marketService.startMarketUpdates();
+        if (marketService != null) {
+            marketService.startMarketUpdates();
+        }
     }
 
     private void initRootLayout() {
