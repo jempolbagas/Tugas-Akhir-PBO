@@ -9,25 +9,27 @@ public class MarketService {
     }
 
     public void startMarketUpdates() {
-        if (updateThread != null && updateThread.isAlive()) {
-            return;
-        }
-
-        updateThread = new Thread(() -> {
-            while (true) {
-                try {
-                    Thread.sleep(10000); // 10 seconds
-                    if (pasar.isPasarBuka()) {
-                        pasar.updateHargaSemua();
-                    }
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                    break;
-                }
+        synchronized (this) {
+            if (updateThread != null && updateThread.isAlive()) {
+                return;
             }
-        });
-        updateThread.setDaemon(true);
-        updateThread.start();
+
+            updateThread = new Thread(() -> {
+                while (true) {
+                    try {
+                        Thread.sleep(10000); // 10 seconds
+                        if (pasar.isPasarBuka()) {
+                            pasar.updateHargaSemua();
+                        }
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                        break;
+                    }
+                }
+            });
+            updateThread.setDaemon(true);
+            updateThread.start();
+        }
     }
 
     public void stopMarketUpdates() {
