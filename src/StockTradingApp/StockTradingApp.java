@@ -17,7 +17,8 @@ public class StockTradingApp extends Application {
     private Stage primaryStage;
     private BorderPane rootLayout;
     private SistemAutentikasi auth;
-    private PasarSaham pasar = new PasarSaham();
+    private MarketService marketService;
+    private TradingService tradingService;
     private Akun akunAktif = null;
     private Label balanceLabel;
 
@@ -28,6 +29,9 @@ public class StockTradingApp extends Application {
         
         try {
             auth = new SistemAutentikasi();
+            marketService = new MarketService();
+            tradingService = new TradingService(marketService, auth);
+
             // Show notifications if any
             java.util.List<String> notifications = auth.getNotifications();
             if (!notifications.isEmpty()) {
@@ -42,7 +46,9 @@ public class StockTradingApp extends Application {
         showSplashScreen();
         
         // Start background price updates
-        startPriceUpdateThread();
+        if (marketService != null) {
+            marketService.startMarketUpdates();
+        }
     }
 
     private void initRootLayout() {
@@ -122,8 +128,12 @@ public class StockTradingApp extends Application {
         marketStatus.setAlignment(Pos.CENTER);
         Label marketLabel = new Label("Market Status:");
         marketLabel.setStyle("-fx-font-family: 'Segoe UI'; -fx-text-fill: #8888ff; -fx-font-size: 12px;");
-        Label marketValue = new Label(pasar.isPasarBuka() ? "🟢 QUANTUM ACTIVE" : "🔴 QUANTUM OFFLINE");
-        marketValue.setStyle(pasar.isPasarBuka() ? 
+
+        // Safety check for marketService in case it failed init (though try/catch above handles it mostly)
+        boolean isOpen = (marketService != null) && marketService.isPasarBuka();
+
+        Label marketValue = new Label(isOpen ? "🟢 QUANTUM ACTIVE" : "🔴 QUANTUM OFFLINE");
+        marketValue.setStyle(isOpen ?
             "-fx-font-family: 'Segoe UI'; -fx-text-fill: #00ff88; -fx-font-weight: bold; -fx-font-size: 12px;" :
             "-fx-font-family: 'Segoe UI'; -fx-text-fill: #ff4444; -fx-font-weight: bold; -fx-font-size: 12px;");
         marketStatus.getChildren().addAll(marketLabel, marketValue);
@@ -289,8 +299,10 @@ public class StockTradingApp extends Application {
         balanceLabel = new Label("QUANTUM FUEL: Rp " + (akunAktif != null ? String.format("%,.2f", akunAktif.getSaldo()) : "0"));
         balanceLabel.setStyle("-fx-font-family: 'Segoe UI'; -fx-text-fill: #00ccff; -fx-font-size: 14px; -fx-font-weight: bold;");
         
-        Label marketStatus = new Label(pasar.isPasarBuka() ? "🟢 MARKET: QUANTUM ACTIVE" : "🔴 MARKET: QUANTUM OFFLINE");
-        marketStatus.setStyle(pasar.isPasarBuka() ? 
+        boolean isOpen = (marketService != null) && marketService.isPasarBuka();
+
+        Label marketStatus = new Label(isOpen ? "🟢 MARKET: QUANTUM ACTIVE" : "🔴 MARKET: QUANTUM OFFLINE");
+        marketStatus.setStyle(isOpen ?
             "-fx-font-family: 'Segoe UI'; -fx-text-fill: #00ff88; -fx-font-size: 12px; -fx-font-weight: bold;" :
             "-fx-font-family: 'Segoe UI'; -fx-text-fill: #ff4444; -fx-font-size: 12px; -fx-font-weight: bold;");
         
@@ -346,7 +358,7 @@ public class StockTradingApp extends Application {
         ListView<String> stockList = new ListView<>();
         stockList.setStyle("-fx-background-color: transparent; -fx-border-color: #444477; -fx-border-radius: 8;");
         
-        for (Saham saham : pasar.getAllSaham()) {
+        for (Saham saham : marketService.getAllSaham()) {
             String stockInfo = String.format("%-8s %-25s %-15s Rp %,10.2f %s %s",
                 saham.getKode(), saham.getNamaSaham(), saham.getSektor(), 
                 saham.getHargaSekarang(), saham.getStatusWarna(), saham.getPerubahanFormatted());
@@ -377,7 +389,7 @@ public class StockTradingApp extends Application {
         
         for (Portfolio port : akunAktif.getPortfolio().values()) {
             try {
-                Saham saham = pasar.getSaham(port.getKodeSaham());
+                Saham saham = marketService.getSaham(port.getKodeSaham());
                 double nilaiSkrg = port.hitungNilaiSekarang(saham.getHargaSekarang());
                 double profit = port.hitungKeuntungan(saham.getHargaSekarang());
                 double persentase = port.hitungPersentaseKeuntungan(saham.getHargaSekarang());
@@ -434,7 +446,7 @@ public class StockTradingApp extends Application {
         title.setStyle("-fx-font-family: 'Segoe UI'; -fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #00ccff;");
         
         ComboBox<String> stockSelector = new ComboBox<>();
-        for (Saham saham : pasar.getAllSaham()) {
+        for (Saham saham : marketService.getAllSaham()) {
             stockSelector.getItems().add(saham.getKode());
         }
         stockSelector.setPromptText("Select Quantum Asset");
@@ -457,7 +469,7 @@ public class StockTradingApp extends Application {
             String selected = stockSelector.getValue();
             if (selected != null) {
                 try {
-                    Saham saham = pasar.getSaham(selected);
+                    Saham saham = marketService.getSaham(selected);
                     priceLabel.setText("Quantum Price: Rp " + String.format("%,.2f", saham.getHargaSekarang()));
                     updateTotalLabel(quantityField, saham, totalLabel);
                 } catch (SahamTidakDitemukanException ex) {
@@ -471,7 +483,7 @@ public class StockTradingApp extends Application {
             String selected = stockSelector.getValue();
             if (selected != null && !newValue.isEmpty()) {
                 try {
-                    Saham saham = pasar.getSaham(selected);
+                    Saham saham = marketService.getSaham(selected);
                     updateTotalLabel(quantityField, saham, totalLabel);
                 } catch (SahamTidakDitemukanException ex) {
                     totalLabel.setText("Total Energy: --");
@@ -498,26 +510,35 @@ public class StockTradingApp extends Application {
             try {
                 int lot = Integer.parseInt(quantityText);
                 int jumlahLembar = lot * 100;
-                Saham saham = pasar.getSaham(selectedStock);
                 
+                TradeResult result;
                 if (type.equals("BUY")) {
-                    akunAktif.beliSaham(saham, jumlahLembar);
-                    showAlert("Quantum Success", "Buy order executed successfully!", Alert.AlertType.INFORMATION);
+                    result = tradingService.buyStock(akunAktif, selectedStock, jumlahLembar);
                 } else {
-                    akunAktif.jualSaham(saham, jumlahLembar);
-                    showAlert("Quantum Success", "Sell order executed successfully!", Alert.AlertType.INFORMATION);
+                    result = tradingService.sellStock(akunAktif, selectedStock, jumlahLembar);
                 }
                 
-                // Update balance display
-                if (balanceLabel != null) {
-                    balanceLabel.setText("QUANTUM FUEL: Rp " + String.format("%,.2f", akunAktif.getSaldo()));
+                if (result.isSuccess()) {
+                    akunAktif = result.getUpdatedAccount();
+                    showAlert("Quantum Success", result.getMessage(), Alert.AlertType.INFORMATION);
+
+                    // Update balance display
+                    if (balanceLabel != null) {
+                        balanceLabel.setText("QUANTUM FUEL: Rp " + String.format("%,.2f", akunAktif.getSaldo()));
+                    }
+
+                    // Clear form
+                    stockSelector.setValue(null);
+                    quantityField.clear();
+                    priceLabel.setText("Quantum Price: --");
+                    totalLabel.setText("Total Energy: --");
+
+                    // Refresh dashboard to update portfolio and balances after trade.
+                    refreshDashboard();
+
+                } else {
+                    showAlert("Quantum Error", result.getMessage(), Alert.AlertType.ERROR);
                 }
-                
-                // Clear form
-                stockSelector.setValue(null);
-                quantityField.clear();
-                priceLabel.setText("Quantum Price: --");
-                totalLabel.setText("Total Energy: --");
                 
             } catch (NumberFormatException ex) {
                 showAlert("Quantum Error", "Invalid quantity format", Alert.AlertType.ERROR);
@@ -530,6 +551,12 @@ public class StockTradingApp extends Application {
         return section;
     }
     
+    private void refreshDashboard() {
+        // Simple way to refresh: rebuild the center content
+        TabPane contentTabs = createContentTabs();
+        ((BorderPane)rootLayout.getCenter()).setCenter(contentTabs);
+    }
+
     private void updateTotalLabel(TextField quantityField, Saham saham, Label totalLabel) {
         try {
             int lot = Integer.parseInt(quantityField.getText());
@@ -594,7 +621,7 @@ public class StockTradingApp extends Application {
         marketList.setStyle("-fx-background-color: transparent; -fx-border-color: #444477; -fx-border-radius: 8;");
         marketList.setPrefHeight(300);
         
-        for (Saham saham : pasar.getAllSaham()) {
+        for (Saham saham : marketService.getAllSaham()) {
             String stockInfo = String.format("%-8s %-25s %-15s Rp %,10.2f %s %s",
                 saham.getKode(), saham.getNamaSaham(), saham.getSektor(), 
                 saham.getHargaSekarang(), saham.getStatusWarna(), saham.getPerubahanFormatted());
@@ -631,26 +658,9 @@ public class StockTradingApp extends Application {
         
         // Style the alert
         DialogPane dialogPane = alert.getDialogPane();
-        dialogPane.setStyle("-fx-background-color: #1a1a2e; -fx-border-color: #444477;");
+        dialogPane.setStyle("-fx-background-color: #1a1a2e; -fx-border-color: #444477; -fx-border-radius: 4; -fx-background-radius: 4; -fx-text-fill: white;");
         
         alert.showAndWait();
-    }
-
-    private void startPriceUpdateThread() {
-        Thread updateThread = new Thread(() -> {
-            while (true) {
-                try {
-                    Thread.sleep(10000); // 10 seconds
-                    if (pasar.isPasarBuka()) {
-                        pasar.updateHargaSemua();
-                    }
-                } catch (InterruptedException e) {
-                    break;
-                }
-            }
-        });
-        updateThread.setDaemon(true);
-        updateThread.start();
     }
 
     public static void main(String[] args) {
