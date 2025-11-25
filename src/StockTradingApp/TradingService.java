@@ -9,6 +9,14 @@ public class TradingService {
         this.auth = auth;
     }
 
+    /**
+     * Attempts to buy the specified quantity of stock for the given account.
+     *
+     * @param akun The account performing the purchase.
+     * @param ticker The stock ticker symbol.
+     * @param quantity The number of shares to buy in sheets (lembar), not lots.
+     * @return The result of the trade operation.
+     */
     public TradeResult buyStock(Akun akun, String ticker, int quantity) {
         if (!marketService.isPasarBuka()) {
             return new TradeResult(false, "Pasar sedang tutup! Transaksi tidak dapat dilakukan.", akun);
