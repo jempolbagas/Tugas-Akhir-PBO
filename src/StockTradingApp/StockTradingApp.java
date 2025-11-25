@@ -17,7 +17,8 @@ public class StockTradingApp extends Application {
     private Stage primaryStage;
     private BorderPane rootLayout;
     private SistemAutentikasi auth;
-    private PasarSaham pasar = new PasarSaham();
+    private MarketService marketService;
+    private TradingService tradingService;
     private Akun akunAktif = null;
     private Label balanceLabel;
 
@@ -28,6 +29,9 @@ public class StockTradingApp extends Application {
         
         try {
             auth = new SistemAutentikasi();
+            marketService = new MarketService();
+            tradingService = new TradingService(marketService, auth);
+
             // Show notifications if any
             java.util.List<String> notifications = auth.getNotifications();
             if (!notifications.isEmpty()) {
@@ -42,7 +46,7 @@ public class StockTradingApp extends Application {
         showSplashScreen();
         
         // Start background price updates
-        startPriceUpdateThread();
+        marketService.startMarketUpdates();
     }
 
     private void initRootLayout() {
@@ -122,8 +126,12 @@ public class StockTradingApp extends Application {
         marketStatus.setAlignment(Pos.CENTER);
         Label marketLabel = new Label("Market Status:");
         marketLabel.setStyle("-fx-font-family: 'Segoe UI'; -fx-text-fill: #8888ff; -fx-font-size: 12px;");
-        Label marketValue = new Label(pasar.isPasarBuka() ? "🟢 QUANTUM ACTIVE" : "🔴 QUANTUM OFFLINE");
-        marketValue.setStyle(pasar.isPasarBuka() ? 
+
+        // Safety check for marketService in case it failed init (though try/catch above handles it mostly)
+        boolean isOpen = (marketService != null) && marketService.isPasarBuka();
+
+        Label marketValue = new Label(isOpen ? "🟢 QUANTUM ACTIVE" : "🔴 QUANTUM OFFLINE");
+        marketValue.setStyle(isOpen ?
             "-fx-font-family: 'Segoe UI'; -fx-text-fill: #00ff88; -fx-font-weight: bold; -fx-font-size: 12px;" :
             "-fx-font-family: 'Segoe UI'; -fx-text-fill: #ff4444; -fx-font-weight: bold; -fx-font-size: 12px;");
         marketStatus.getChildren().addAll(marketLabel, marketValue);
@@ -289,8 +297,10 @@ public class StockTradingApp extends Application {
         balanceLabel = new Label("QUANTUM FUEL: Rp " + (akunAktif != null ? String.format("%,.2f", akunAktif.getSaldo()) : "0"));
         balanceLabel.setStyle("-fx-font-family: 'Segoe UI'; -fx-text-fill: #00ccff; -fx-font-size: 14px; -fx-font-weight: bold;");
         
-        Label marketStatus = new Label(pasar.isPasarBuka() ? "🟢 MARKET: QUANTUM ACTIVE" : "🔴 MARKET: QUANTUM OFFLINE");
-        marketStatus.setStyle(pasar.isPasarBuka() ? 
+        boolean isOpen = (marketService != null) && marketService.isPasarBuka();
+
+        Label marketStatus = new Label(isOpen ? "🟢 MARKET: QUANTUM ACTIVE" : "🔴 MARKET: QUANTUM OFFLINE");
+        marketStatus.setStyle(isOpen ?
             "-fx-font-family: 'Segoe UI'; -fx-text-fill: #00ff88; -fx-font-size: 12px; -fx-font-weight: bold;" :
             "-fx-font-family: 'Segoe UI'; -fx-text-fill: #ff4444; -fx-font-size: 12px; -fx-font-weight: bold;");
         
@@ -346,7 +356,7 @@ public class StockTradingApp extends Application {
         ListView<String> stockList = new ListView<>();
         stockList.setStyle("-fx-background-color: transparent; -fx-border-color: #444477; -fx-border-radius: 8;");
         
-        for (Saham saham : pasar.getAllSaham()) {
+        for (Saham saham : marketService.getAllSaham()) {
             String stockInfo = String.format("%-8s %-25s %-15s Rp %,10.2f %s %s",
                 saham.getKode(), saham.getNamaSaham(), saham.getSektor(), 
                 saham.getHargaSekarang(), saham.getStatusWarna(), saham.getPerubahanFormatted());
@@ -377,7 +387,7 @@ public class StockTradingApp extends Application {
         
         for (Portfolio port : akunAktif.getPortfolio().values()) {
             try {
-                Saham saham = pasar.getSaham(port.getKodeSaham());
+                Saham saham = marketService.getSaham(port.getKodeSaham());
                 double nilaiSkrg = port.hitungNilaiSekarang(saham.getHargaSekarang());
                 double profit = port.hitungKeuntungan(saham.getHargaSekarang());
                 double persentase = port.hitungPersentaseKeuntungan(saham.getHargaSekarang());
@@ -434,7 +444,7 @@ public class StockTradingApp extends Application {
         title.setStyle("-fx-font-family: 'Segoe UI'; -fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #00ccff;");
         
         ComboBox<String> stockSelector = new ComboBox<>();
-        for (Saham saham : pasar.getAllSaham()) {
+        for (Saham saham : marketService.getAllSaham()) {
             stockSelector.getItems().add(saham.getKode());
         }
         stockSelector.setPromptText("Select Quantum Asset");
@@ -457,7 +467,7 @@ public class StockTradingApp extends Application {
             String selected = stockSelector.getValue();
             if (selected != null) {
                 try {
-                    Saham saham = pasar.getSaham(selected);
+                    Saham saham = marketService.getSaham(selected);
                     priceLabel.setText("Quantum Price: Rp " + String.format("%,.2f", saham.getHargaSekarang()));
                     updateTotalLabel(quantityField, saham, totalLabel);
                 } catch (SahamTidakDitemukanException ex) {
@@ -471,7 +481,7 @@ public class StockTradingApp extends Application {
             String selected = stockSelector.getValue();
             if (selected != null && !newValue.isEmpty()) {
                 try {
-                    Saham saham = pasar.getSaham(selected);
+                    Saham saham = marketService.getSaham(selected);
                     updateTotalLabel(quantityField, saham, totalLabel);
                 } catch (SahamTidakDitemukanException ex) {
                     totalLabel.setText("Total Energy: --");
@@ -497,27 +507,119 @@ public class StockTradingApp extends Application {
             
             try {
                 int lot = Integer.parseInt(quantityText);
-                int jumlahLembar = lot * 100;
-                Saham saham = pasar.getSaham(selectedStock);
+                // Convert to sheets is handled in TradingService? No, I decided TradingService takes sheets.
+                // Re-reading my TradingService code: "int jumlahLembar = quantity * 100;"
+                // So TradingService expects LOTS.
+                // Wait, let's double check TradingService.java.
+                // "int jumlahLembar = quantity * 100;" in buyStock.
+                // Yes, I coded it to take LOTS.
+                // So I should pass LOTS here.
                 
+                TradeResult result;
                 if (type.equals("BUY")) {
-                    akunAktif.beliSaham(saham, jumlahLembar);
-                    showAlert("Quantum Success", "Buy order executed successfully!", Alert.AlertType.INFORMATION);
+                     result = tradingService.buyStock(akunAktif, selectedStock, lot);
                 } else {
-                    akunAktif.jualSaham(saham, jumlahLembar);
-                    showAlert("Quantum Success", "Sell order executed successfully!", Alert.AlertType.INFORMATION);
+                     // In sellStock: "akun.jualSaham(saham, quantity);"
+                     // Akun.jualSaham takes sheets?
+                     // Let's check Akun.java: "public void jualSaham(Saham saham, int jumlah)"
+                     // And "if (port.getJumlah() < jumlah)" - port.getJumlah() is sheets.
+                     // So Akun expects sheets.
+
+                     // In TradingService.sellStock:
+                     // "akun.jualSaham(saham, quantity);"
+                     // So if I pass lots to sellStock, it tries to sell that many sheets.
+                     // BUT for buyStock, I did: "int jumlahLembar = quantity * 100;"
+
+                     // INCONSISTENCY DETECTED.
+                     // TradingService.buyStock takes Lots.
+                     // TradingService.sellStock takes Sheets (as written).
+
+                     // I must fix TradingService first to be consistent.
+                     // I will assume TradingService takes LOTS for both, or SHEETS for both.
+                     // Given the GUI says "Quantity (lots)", passing LOTS is easiest for UI.
+                     // I will modify TradingService to accept LOTS for both.
+
+                     // Let's modify TradingService.java first.
+                     // But I am in the middle of writing StockTradingApp.java.
+                     // I can finish StockTradingApp assuming TradingService takes LOTS,
+                     // and then update TradingService to ensure it handles the conversion.
+
+                     // Let's check CLI:
+                     // CLI beliSaham passes 'lot' to 'tradingService.buyStock(..., lot)'.
+                     // CLI jualSaham passes 'jumlah' (sheets) to 'tradingService.sellStock(..., jumlah)'.
+                     // CLI prompts: "Jumlah lembar yang ingin dijual".
+
+                     // So CLI uses Lots for Buy, and Sheets for Sell.
+                     // This is confusing UI design in the legacy app.
+                     // GUI prompt says "Quantity (lots)" for both Buy and Sell?
+                     // In GUI `createTradeView`, `quantityField.setPromptText("Quantity (lots)")`.
+                     // So GUI expects Lots for both.
+
+                     // So:
+                     // GUI -> Buy (Lots) -> TradingService.buyStock
+                     // GUI -> Sell (Lots) -> TradingService.sellStock
+
+                     // CLI -> Buy (Lots) -> TradingService.buyStock
+                     // CLI -> Sell (Sheets) -> TradingService.sellStock
+
+                     // I should make TradingService explicit or consistent.
+                     // Ideally TradingService methods should be `buyStockLots` or `buyStockSheets`.
+                     // Or just standardized on one unit.
+
+                     // If I standardize on Sheets (Lembar):
+                     // CLI Buy: passes lot * 100.
+                     // CLI Sell: passes sheets.
+                     // GUI Buy: passes lot * 100.
+                     // GUI Sell: passes lot * 100.
+
+                     // This seems safest.
+                     // So I will modify TradingService to expect SHEETS.
+
+                     // My previous TradingService.buyStock did: "int jumlahLembar = quantity * 100;"
+                     // This means it expected LOTS.
+                     // I should change this to expect SHEETS, and let the caller multiply.
                 }
                 
-                // Update balance display
-                if (balanceLabel != null) {
-                    balanceLabel.setText("QUANTUM FUEL: Rp " + String.format("%,.2f", akunAktif.getSaldo()));
+                // I will proceed with writing StockTradingApp passing SHEETS (calculating lot * 100 here).
+                // And I will update TradingService to remove the multiplication.
+                // And I will update CLI to pass sheets (lot * 100) for buy.
+
+                int jumlahLembar = lot * 100;
+
+                if (type.equals("BUY")) {
+                    result = tradingService.buyStock(akunAktif, selectedStock, jumlahLembar);
+                } else {
+                    result = tradingService.sellStock(akunAktif, selectedStock, jumlahLembar);
                 }
                 
-                // Clear form
-                stockSelector.setValue(null);
-                quantityField.clear();
-                priceLabel.setText("Quantum Price: --");
-                totalLabel.setText("Total Energy: --");
+                if (result.isSuccess()) {
+                    akunAktif = result.getUpdatedAccount();
+                    showAlert("Quantum Success", result.getMessage(), Alert.AlertType.INFORMATION);
+
+                    // Update balance display
+                    if (balanceLabel != null) {
+                        balanceLabel.setText("QUANTUM FUEL: Rp " + String.format("%,.2f", akunAktif.getSaldo()));
+                    }
+
+                    // Clear form
+                    stockSelector.setValue(null);
+                    quantityField.clear();
+                    priceLabel.setText("Quantum Price: --");
+                    totalLabel.setText("Total Energy: --");
+
+                    // Refresh portfolio tab if needed?
+                    // The tabs are created once. The portfolio view reads from akunAktif.
+                    // Does it refresh automatically?
+                    // createPortfolioView() builds the node once.
+                    // The list inside won't update automatically unless it's observable or we rebuild it.
+                    // The GUI implementation seems static (builds view once).
+                    // I need to refresh the views.
+                    // Since the tabs content are set statically, I might need to rebuild the views.
+                    refreshDashboard();
+
+                } else {
+                    showAlert("Quantum Error", result.getMessage(), Alert.AlertType.ERROR);
+                }
                 
             } catch (NumberFormatException ex) {
                 showAlert("Quantum Error", "Invalid quantity format", Alert.AlertType.ERROR);
@@ -530,6 +632,12 @@ public class StockTradingApp extends Application {
         return section;
     }
     
+    private void refreshDashboard() {
+        // Simple way to refresh: rebuild the center content
+        TabPane contentTabs = createContentTabs();
+        ((BorderPane)rootLayout.getCenter()).setCenter(contentTabs);
+    }
+
     private void updateTotalLabel(TextField quantityField, Saham saham, Label totalLabel) {
         try {
             int lot = Integer.parseInt(quantityField.getText());
@@ -594,7 +702,7 @@ public class StockTradingApp extends Application {
         marketList.setStyle("-fx-background-color: transparent; -fx-border-color: #444477; -fx-border-radius: 8;");
         marketList.setPrefHeight(300);
         
-        for (Saham saham : pasar.getAllSaham()) {
+        for (Saham saham : marketService.getAllSaham()) {
             String stockInfo = String.format("%-8s %-25s %-15s Rp %,10.2f %s %s",
                 saham.getKode(), saham.getNamaSaham(), saham.getSektor(), 
                 saham.getHargaSekarang(), saham.getStatusWarna(), saham.getPerubahanFormatted());
@@ -631,26 +739,9 @@ public class StockTradingApp extends Application {
         
         // Style the alert
         DialogPane dialogPane = alert.getDialogPane();
-        dialogPane.setStyle("-fx-background-color: #1a1a2e; -fx-border-color: #444477;");
+        dialogPane.setStyle("-fx-background-color: #1a1a2e; -fx-border-color: #444477; -fx-border-radius: 4; -fx-background-radius: 4; -fx-text-fill: white;");
         
         alert.showAndWait();
-    }
-
-    private void startPriceUpdateThread() {
-        Thread updateThread = new Thread(() -> {
-            while (true) {
-                try {
-                    Thread.sleep(10000); // 10 seconds
-                    if (pasar.isPasarBuka()) {
-                        pasar.updateHargaSemua();
-                    }
-                } catch (InterruptedException e) {
-                    break;
-                }
-            }
-        });
-        updateThread.setDaemon(true);
-        updateThread.start();
     }
 
     public static void main(String[] args) {
