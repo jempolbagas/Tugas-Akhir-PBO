@@ -28,7 +28,7 @@ public class TradingService {
             int jumlahLembar = quantity;
 
             if (jumlahLembar <= 0) {
-                 return new TradeResult(false, "Jumlah harus positif!", akun);
+                return new TradeResult(false, "Jumlah harus positif!", akun);
             }
 
             // Snapshot for rollback
@@ -61,6 +61,14 @@ public class TradingService {
         }
     }
 
+    /**
+     * Sells the specified quantity of shares (in sheets/lembar) for the given ticker from the user's account.
+     *
+     * @param akun    The account performing the sale.
+     * @param ticker  The stock ticker symbol to sell.
+     * @param quantity The number of shares to sell in sheets (lembar), not lots.
+     * @return        The result of the trade.
+     */
     public TradeResult sellStock(Akun akun, String ticker, int quantity) {
         if (!marketService.isPasarBuka()) {
             return new TradeResult(false, "Pasar sedang tutup! Transaksi tidak dapat dilakukan.", akun);

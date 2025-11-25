@@ -509,85 +509,9 @@ public class StockTradingApp extends Application {
             
             try {
                 int lot = Integer.parseInt(quantityText);
-                // Convert to sheets is handled in TradingService? No, I decided TradingService takes sheets.
-                // Re-reading my TradingService code: "int jumlahLembar = quantity * 100;"
-                // So TradingService expects LOTS.
-                // Wait, let's double check TradingService.java.
-                // "int jumlahLembar = quantity * 100;" in buyStock.
-                // Yes, I coded it to take LOTS.
-                // So I should pass LOTS here.
+                int jumlahLembar = lot * 100;
                 
                 TradeResult result;
-                if (type.equals("BUY")) {
-                     result = tradingService.buyStock(akunAktif, selectedStock, lot);
-                } else {
-                     // In sellStock: "akun.jualSaham(saham, quantity);"
-                     // Akun.jualSaham takes sheets?
-                     // Let's check Akun.java: "public void jualSaham(Saham saham, int jumlah)"
-                     // And "if (port.getJumlah() < jumlah)" - port.getJumlah() is sheets.
-                     // So Akun expects sheets.
-
-                     // In TradingService.sellStock:
-                     // "akun.jualSaham(saham, quantity);"
-                     // So if I pass lots to sellStock, it tries to sell that many sheets.
-                     // BUT for buyStock, I did: "int jumlahLembar = quantity * 100;"
-
-                     // INCONSISTENCY DETECTED.
-                     // TradingService.buyStock takes Lots.
-                     // TradingService.sellStock takes Sheets (as written).
-
-                     // I must fix TradingService first to be consistent.
-                     // I will assume TradingService takes LOTS for both, or SHEETS for both.
-                     // Given the GUI says "Quantity (lots)", passing LOTS is easiest for UI.
-                     // I will modify TradingService to accept LOTS for both.
-
-                     // Let's modify TradingService.java first.
-                     // But I am in the middle of writing StockTradingApp.java.
-                     // I can finish StockTradingApp assuming TradingService takes LOTS,
-                     // and then update TradingService to ensure it handles the conversion.
-
-                     // Let's check CLI:
-                     // CLI beliSaham passes 'lot' to 'tradingService.buyStock(..., lot)'.
-                     // CLI jualSaham passes 'jumlah' (sheets) to 'tradingService.sellStock(..., jumlah)'.
-                     // CLI prompts: "Jumlah lembar yang ingin dijual".
-
-                     // So CLI uses Lots for Buy, and Sheets for Sell.
-                     // This is confusing UI design in the legacy app.
-                     // GUI prompt says "Quantity (lots)" for both Buy and Sell?
-                     // In GUI `createTradeView`, `quantityField.setPromptText("Quantity (lots)")`.
-                     // So GUI expects Lots for both.
-
-                     // So:
-                     // GUI -> Buy (Lots) -> TradingService.buyStock
-                     // GUI -> Sell (Lots) -> TradingService.sellStock
-
-                     // CLI -> Buy (Lots) -> TradingService.buyStock
-                     // CLI -> Sell (Sheets) -> TradingService.sellStock
-
-                     // I should make TradingService explicit or consistent.
-                     // Ideally TradingService methods should be `buyStockLots` or `buyStockSheets`.
-                     // Or just standardized on one unit.
-
-                     // If I standardize on Sheets (Lembar):
-                     // CLI Buy: passes lot * 100.
-                     // CLI Sell: passes sheets.
-                     // GUI Buy: passes lot * 100.
-                     // GUI Sell: passes lot * 100.
-
-                     // This seems safest.
-                     // So I will modify TradingService to expect SHEETS.
-
-                     // My previous TradingService.buyStock did: "int jumlahLembar = quantity * 100;"
-                     // This means it expected LOTS.
-                     // I should change this to expect SHEETS, and let the caller multiply.
-                }
-                
-                // I will proceed with writing StockTradingApp passing SHEETS (calculating lot * 100 here).
-                // And I will update TradingService to remove the multiplication.
-                // And I will update CLI to pass sheets (lot * 100) for buy.
-
-                int jumlahLembar = lot * 100;
-
                 if (type.equals("BUY")) {
                     result = tradingService.buyStock(akunAktif, selectedStock, jumlahLembar);
                 } else {
@@ -609,14 +533,7 @@ public class StockTradingApp extends Application {
                     priceLabel.setText("Quantum Price: --");
                     totalLabel.setText("Total Energy: --");
 
-                    // Refresh portfolio tab if needed?
-                    // The tabs are created once. The portfolio view reads from akunAktif.
-                    // Does it refresh automatically?
-                    // createPortfolioView() builds the node once.
-                    // The list inside won't update automatically unless it's observable or we rebuild it.
-                    // The GUI implementation seems static (builds view once).
-                    // I need to refresh the views.
-                    // Since the tabs content are set statically, I might need to rebuild the views.
+                    // Refresh dashboard to update portfolio and balances after trade.
                     refreshDashboard();
 
                 } else {
