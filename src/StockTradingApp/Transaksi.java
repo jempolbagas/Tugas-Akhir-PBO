@@ -1,6 +1,7 @@
 package StockTradingApp;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 
 class Transaksi {
     private String idTransaksi;
@@ -14,7 +15,7 @@ class Transaksi {
     
     public Transaksi(String jenis, String kodeSaham, String namaSaham, 
                      int jumlah, BigDecimal harga) {
-        this(jenis, kodeSaham, namaSaham, jumlah, harga, harga.multiply(BigDecimal.valueOf(jumlah)));
+        this(jenis, kodeSaham, namaSaham, jumlah, harga, harga.multiply(BigDecimal.valueOf(jumlah)).setScale(2, RoundingMode.HALF_UP));
     }
 
     // Constructor for non-stock transactions like TOPUP
