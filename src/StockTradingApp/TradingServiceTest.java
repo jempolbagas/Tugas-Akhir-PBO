@@ -21,7 +21,7 @@ public class TradingServiceTest {
         tradingService = new TradingService(mockMarketService, mockAuth);
 
         // Initial balance: 10,000.00
-        testAkun = new Akun("testuser", "password", "Test User", "test@example.com", 10000.00);
+        testAkun = new Akun("testuser", "password", "Test User", "test@example.com", new BigDecimal("10000.00"));
 
         // Stock price: 500.00
         testSaham = new Saham("TEST", "Test Stock", "Testing", new BigDecimal("500.00"));
@@ -42,7 +42,7 @@ public class TradingServiceTest {
         assertTrue(result.isSuccess());
         assertEquals("Pembelian berhasil!", result.getMessage());
         // 10000 - 5000 = 5000
-        assertEquals(new BigDecimal("5000.00"), testAkun.getSaldo());
+        assertEquals(0, new BigDecimal("5000.00").compareTo(testAkun.getSaldo()));
         assertEquals(1, testAkun.getPortfolio().size());
         assertEquals(10, testAkun.getPortfolio().get("TEST").getJumlah());
     }
@@ -55,7 +55,7 @@ public class TradingServiceTest {
         assertFalse(result.isSuccess());
         assertTrue(result.getMessage().contains("Saldo tidak cukup!"));
         // Balance should not change
-        assertEquals(new BigDecimal("10000.00"), testAkun.getSaldo());
+        assertEquals(0, new BigDecimal("10000.00").compareTo(testAkun.getSaldo()));
         assertEquals(0, testAkun.getPortfolio().size());
     }
 
@@ -65,7 +65,7 @@ public class TradingServiceTest {
 
         assertFalse(result.isSuccess());
         assertTrue(result.getMessage().contains("Anda tidak memiliki saham"));
-        assertEquals(new BigDecimal("10000.00"), testAkun.getSaldo());
+        assertEquals(0, new BigDecimal("10000.00").compareTo(testAkun.getSaldo()));
     }
 
     @Test
@@ -78,12 +78,12 @@ public class TradingServiceTest {
             fail("Setup failed for precision test");
         }
 
-        Akun precisionAkun = new Akun("precuser", "pass", "Prec User", "p@e.com", 1.0);
+        Akun precisionAkun = new Akun("precuser", "pass", "Prec User", "p@e.com", new BigDecimal("1.0"));
 
         // Buy 3 shares at 0.1 each = 0.3
         tradingService.buyStock(precisionAkun, "PRE", 3);
 
         // Expected balance: 1.0 - 0.3 = 0.7
-        assertEquals(new BigDecimal("0.70"), precisionAkun.getSaldo());
+        assertEquals(0, new BigDecimal("0.70").compareTo(precisionAkun.getSaldo()));
     }
 }

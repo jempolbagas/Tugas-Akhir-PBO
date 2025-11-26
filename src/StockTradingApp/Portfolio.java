@@ -58,7 +58,7 @@ class Portfolio {
 
     public BigDecimal hitungPersentaseKeuntungan(BigDecimal hargaSekarang) {
         if (totalModal.compareTo(BigDecimal.ZERO) == 0) {
-            return BigDecimal.ZERO;
+            throw new IllegalStateException("Total modal is zero. This indicates an invalid portfolio state.");
         }
         return hitungKeuntungan(hargaSekarang)
                 .divide(totalModal, 4, RoundingMode.HALF_UP)

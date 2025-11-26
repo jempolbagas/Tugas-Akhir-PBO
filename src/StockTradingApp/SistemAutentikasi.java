@@ -1,6 +1,7 @@
 package StockTradingApp;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import com.google.gson.JsonSyntaxException;
 import java.io.File;
 
@@ -45,7 +46,7 @@ class SistemAutentikasi {
     }
     
     public void buatAkun(String username, String password, String namaLengkap, 
-                         String email, double saldoAwal) throws Exception {
+                         String email, BigDecimal saldoAwal) throws Exception {
         if (database.containsKey(username)) {
             throw new Exception("Username sudah digunakan!");
         }

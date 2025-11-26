@@ -38,12 +38,12 @@ class Saham {
     public void updateHarga(java.util.Random random) {
         // Perubahan harga antara -5% sampai +5%
         double persentasePerubahanDouble = (random.nextDouble() * 10) - 5; // -5 to +5
-        BigDecimal persentasePerubahan = BigDecimal.valueOf(persentasePerubahanDouble).divide(ONE_HUNDRED);
+        BigDecimal persentasePerubahan = BigDecimal.valueOf(persentasePerubahanDouble).divide(ONE_HUNDRED, 4, RoundingMode.HALF_UP);
         BigDecimal perubahanHarga = hargaSekarang.multiply(persentasePerubahan).setScale(2, RoundingMode.HALF_UP);
         
         hargaSekarang = hargaSekarang.add(perubahanHarga);
         if (hargaSekarang.compareTo(MINIMUM_PRICE) < 0) {
-            hargaSekarang = MINIMUM_PRICE.setScale(2, RoundingMode.HALF_UP);
+            hargaSekarang = MINIMUM_PRICE;
         }
         
         perubahan = hargaSekarang.subtract(hargaBuka)

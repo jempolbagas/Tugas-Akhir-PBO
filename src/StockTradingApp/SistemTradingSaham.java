@@ -1,5 +1,7 @@
 package StockTradingApp;
 
+import java.math.BigDecimal;
+
 public class SistemTradingSaham {
     private static java.util.Scanner scanner = new java.util.Scanner(System.in);
     private static SistemAutentikasi auth;
@@ -111,9 +113,9 @@ public class SistemTradingSaham {
             String email = scanner.nextLine();
             
             System.out.print("Deposit Awal (min. Rp 100.000): Rp ");
-            double depositAwal = Double.parseDouble(scanner.nextLine());
+            BigDecimal depositAwal = new BigDecimal(scanner.nextLine());
             
-            if (depositAwal < 100000) {
+            if (depositAwal.compareTo(new BigDecimal("100000")) < 0) {
                 System.out.println("\n✗ Deposit minimal Rp 100.000!");
                 return;
             }

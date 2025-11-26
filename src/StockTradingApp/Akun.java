@@ -13,12 +13,12 @@ class Akun {
     private java.util.ArrayList<Transaksi> riwayatTransaksi;
     private java.time.LocalDateTime tanggalBuat;
 
-    public Akun(String username, String password, String namaLengkap, String email, double saldoAwal) {
+    public Akun(String username, String password, String namaLengkap, String email, BigDecimal saldoAwal) {
         this.username = username;
         this.password = password;
         this.namaLengkap = namaLengkap;
         this.email = email;
-        this.saldo = BigDecimal.valueOf(saldoAwal).setScale(2, RoundingMode.HALF_UP);
+        this.saldo = saldoAwal.setScale(2, RoundingMode.HALF_UP);
         this.portfolio = new java.util.HashMap<>();
         this.riwayatTransaksi = new java.util.ArrayList<>();
         this.tanggalBuat = java.time.LocalDateTime.now();
@@ -43,7 +43,7 @@ class Akun {
     }
 
     public void beliSaham(Saham saham, int jumlah) throws SaldoTidakCukupException {
-        BigDecimal totalHarga = saham.getHargaSekarang().multiply(BigDecimal.valueOf(jumlah));
+        BigDecimal totalHarga = saham.getHargaSekarang().multiply(BigDecimal.valueOf(jumlah)).setScale(2, RoundingMode.HALF_UP);
 
         if (saldo.compareTo(totalHarga) < 0) {
             throw new SaldoTidakCukupException("Saldo tidak cukup! Dibutuhkan: Rp " +
@@ -76,7 +76,7 @@ class Akun {
                 port.getJumlah() + " lembar");
         }
 
-        BigDecimal totalHarga = saham.getHargaSekarang().multiply(BigDecimal.valueOf(jumlah));
+        BigDecimal totalHarga = saham.getHargaSekarang().multiply(BigDecimal.valueOf(jumlah)).setScale(2, RoundingMode.HALF_UP);
         saldo = saldo.add(totalHarga);
 
         port.kurangiJumlah(jumlah);
