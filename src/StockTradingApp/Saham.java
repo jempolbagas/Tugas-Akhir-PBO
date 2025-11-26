@@ -15,12 +15,12 @@ class Saham {
     private BigDecimal perubahan;
     private long volume;
     
-    public Saham(String kode, String namaSaham, String sektor, double hargaAwal) {
+    public Saham(String kode, String namaSaham, String sektor, BigDecimal hargaAwal) {
         this.kode = kode;
         this.namaSaham = namaSaham;
         this.sektor = sektor;
-        this.hargaSekarang = BigDecimal.valueOf(hargaAwal).setScale(2, RoundingMode.HALF_UP);
-        this.hargaBuka = BigDecimal.valueOf(hargaAwal).setScale(2, RoundingMode.HALF_UP);
+        this.hargaSekarang = hargaAwal.setScale(2, RoundingMode.HALF_UP);
+        this.hargaBuka = hargaAwal.setScale(2, RoundingMode.HALF_UP);
         this.perubahan = BigDecimal.ZERO;
         this.volume = 0;
     }

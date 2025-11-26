@@ -14,22 +14,22 @@ class PasarSaham {
     
     private void initializeSaham() {
         // Saham Blue Chip
-        tambahSaham(new Saham("BBCA", "Bank Central Asia", "Perbankan", 8500));
-        tambahSaham(new Saham("BBRI", "Bank Rakyat Indonesia", "Perbankan", 4500));
-        tambahSaham(new Saham("TLKM", "Telekomunikasi Indonesia", "Telekomunikasi", 3200));
-        tambahSaham(new Saham("ASII", "Astra International", "Otomotif", 5100));
-        tambahSaham(new Saham("UNVR", "Unilever Indonesia", "Konsumer", 4200));
+        tambahSaham(new Saham("BBCA", "Bank Central Asia", "Perbankan", new java.math.BigDecimal("8500")));
+        tambahSaham(new Saham("BBRI", "Bank Rakyat Indonesia", "Perbankan", new java.math.BigDecimal("4500")));
+        tambahSaham(new Saham("TLKM", "Telekomunikasi Indonesia", "Telekomunikasi", new java.math.BigDecimal("3200")));
+        tambahSaham(new Saham("ASII", "Astra International", "Otomotif", new java.math.BigDecimal("5100")));
+        tambahSaham(new Saham("UNVR", "Unilever Indonesia", "Konsumer", new java.math.BigDecimal("4200")));
         
         // Saham Tech
-        tambahSaham(new Saham("GOTO", "GoTo Gojek Tokopedia", "Teknologi", 1200));
-        tambahSaham(new Saham("BUKA", "Bukalapak", "E-Commerce", 800));
+        tambahSaham(new Saham("GOTO", "GoTo Gojek Tokopedia", "Teknologi", new java.math.BigDecimal("1200")));
+        tambahSaham(new Saham("BUKA", "Bukalapak", "E-Commerce", new java.math.BigDecimal("800")));
         
         // Saham Energi
-        tambahSaham(new Saham("PGAS", "Perusahaan Gas Negara", "Energi", 1500));
-        tambahSaham(new Saham("ADRO", "Adaro Energy", "Pertambangan", 2800));
+        tambahSaham(new Saham("PGAS", "Perusahaan Gas Negara", "Energi", new java.math.BigDecimal("1500")));
+        tambahSaham(new Saham("ADRO", "Adaro Energy", "Pertambangan", new java.math.BigDecimal("2800")));
         
         // Saham Property
-        tambahSaham(new Saham("BSDE", "Bumi Serpong Damai", "Property", 1100));
+        tambahSaham(new Saham("BSDE", "Bumi Serpong Damai", "Property", new java.math.BigDecimal("1100")));
     }
     
     private void tambahSaham(Saham saham) {

@@ -14,13 +14,22 @@ class Transaksi {
     
     public Transaksi(String jenis, String kodeSaham, String namaSaham, 
                      int jumlah, BigDecimal harga) {
+        this(jenis, kodeSaham, namaSaham, jumlah, harga, harga.multiply(BigDecimal.valueOf(jumlah)));
+    }
+
+    // Constructor for non-stock transactions like TOPUP
+    public Transaksi(String jenis, String deskripsi, BigDecimal total) {
+        this(jenis, "-", deskripsi, 1, total, total);
+    }
+
+    private Transaksi(String jenis, String kodeSaham, String namaSaham, int jumlah, BigDecimal harga, BigDecimal total) {
         this.idTransaksi = "TRX" + System.currentTimeMillis();
         this.jenis = jenis;
         this.kodeSaham = kodeSaham;
         this.namaSaham = namaSaham;
         this.jumlah = jumlah;
         this.harga = harga;
-        this.total = harga.multiply(BigDecimal.valueOf(jumlah));
+        this.total = total;
         this.waktu = java.time.LocalDateTime.now();
     }
     
