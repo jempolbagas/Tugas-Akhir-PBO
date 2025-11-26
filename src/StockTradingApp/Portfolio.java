@@ -4,6 +4,8 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 
 class Portfolio {
+    private static final BigDecimal ONE_HUNDRED = new BigDecimal("100");
+
     private String kodeSaham;
     private String namaSaham;
     private int jumlah;
@@ -60,7 +62,7 @@ class Portfolio {
         }
         return hitungKeuntungan(hargaSekarang)
                 .divide(totalModal, 4, RoundingMode.HALF_UP)
-                .multiply(new BigDecimal("100"))
+                .multiply(ONE_HUNDRED)
                 .setScale(2, RoundingMode.HALF_UP);
     }
 
