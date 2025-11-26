@@ -1,30 +1,32 @@
 package StockTradingApp;
 
+import java.math.BigDecimal;
+
 class Transaksi {
     private String idTransaksi;
     private String jenis; // BUY atau SELL
     private String kodeSaham;
     private String namaSaham;
     private int jumlah;
-    private double harga;
-    private double total;
+    private BigDecimal harga;
+    private BigDecimal total;
     private java.time.LocalDateTime waktu;
     
     public Transaksi(String jenis, String kodeSaham, String namaSaham, 
-                     int jumlah, double harga) {
+                     int jumlah, BigDecimal harga) {
         this.idTransaksi = "TRX" + System.currentTimeMillis();
         this.jenis = jenis;
         this.kodeSaham = kodeSaham;
         this.namaSaham = namaSaham;
         this.jumlah = jumlah;
         this.harga = harga;
-        this.total = jumlah * harga;
+        this.total = harga.multiply(BigDecimal.valueOf(jumlah));
         this.waktu = java.time.LocalDateTime.now();
     }
     
     public String getJenis() { return jenis; }
     public String getKodeSaham() { return kodeSaham; }
-    public double getTotal() { return total; }
+    public BigDecimal getTotal() { return total; }
     public int getJumlah() { return jumlah; }
     
     @Override
