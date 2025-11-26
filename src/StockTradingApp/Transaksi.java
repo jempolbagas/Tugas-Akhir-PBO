@@ -1,30 +1,42 @@
 package StockTradingApp;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+
 class Transaksi {
     private String idTransaksi;
     private String jenis; // BUY atau SELL
     private String kodeSaham;
     private String namaSaham;
     private int jumlah;
-    private double harga;
-    private double total;
+    private BigDecimal harga;
+    private BigDecimal total;
     private java.time.LocalDateTime waktu;
     
     public Transaksi(String jenis, String kodeSaham, String namaSaham, 
-                     int jumlah, double harga) {
+                     int jumlah, BigDecimal harga) {
+        this(jenis, kodeSaham, namaSaham, jumlah, harga, harga.multiply(BigDecimal.valueOf(jumlah)).setScale(2, RoundingMode.HALF_UP));
+    }
+
+    // Constructor for non-stock transactions like TOPUP
+    public Transaksi(String jenis, String deskripsi, BigDecimal total) {
+        this(jenis, "-", deskripsi, 1, total, total);
+    }
+
+    private Transaksi(String jenis, String kodeSaham, String namaSaham, int jumlah, BigDecimal harga, BigDecimal total) {
         this.idTransaksi = "TRX" + System.currentTimeMillis();
         this.jenis = jenis;
         this.kodeSaham = kodeSaham;
         this.namaSaham = namaSaham;
         this.jumlah = jumlah;
         this.harga = harga;
-        this.total = jumlah * harga;
+        this.total = total;
         this.waktu = java.time.LocalDateTime.now();
     }
     
     public String getJenis() { return jenis; }
     public String getKodeSaham() { return kodeSaham; }
-    public double getTotal() { return total; }
+    public BigDecimal getTotal() { return total; }
     public int getJumlah() { return jumlah; }
     
     @Override

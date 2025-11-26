@@ -11,6 +11,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.animation.FadeTransition;
 import javafx.util.Duration;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 
 public class StockTradingApp extends Application {
@@ -208,9 +209,9 @@ public class StockTradingApp extends Application {
                 String password = pfPassword.getText();
                 String fullName = tfFullName.getText();
                 String email = tfEmail.getText();
-                double deposit = Double.parseDouble(tfDeposit.getText());
+                BigDecimal deposit = new BigDecimal(tfDeposit.getText());
                 
-                if (deposit < 100000) {
+                if (deposit.compareTo(new BigDecimal("100000")) < 0) {
                     showAlert("Quantum Error", "Initial fuel must be at least Rp 100.000", Alert.AlertType.ERROR);
                     return;
                 }

@@ -1,5 +1,7 @@
 package StockTradingApp;
 
+import java.math.BigDecimal;
+
 public class TradingService {
     private final MarketService marketService;
     private final SistemAutentikasi auth;
@@ -32,12 +34,12 @@ public class TradingService {
             }
 
             // Snapshot for rollback
-            double saldoSebelum = akun.getSaldo();
+            BigDecimal saldoSebelum = akun.getSaldo();
             Portfolio portfolioSebelum = akun.getPortfolio().get(saham.getKode());
             // Deep copy primitive/immutable values
             int jumlahPortfolioSebelum = portfolioSebelum != null ? portfolioSebelum.getJumlah() : 0;
-            double hargaBeliSebelum = portfolioSebelum != null ? portfolioSebelum.getHargaBeli() : 0;
-            double totalModalSebelum = portfolioSebelum != null ? portfolioSebelum.getTotalModal() : 0;
+            BigDecimal hargaBeliSebelum = portfolioSebelum != null ? portfolioSebelum.getHargaBeli() : BigDecimal.ZERO;
+            BigDecimal totalModalSebelum = portfolioSebelum != null ? portfolioSebelum.getTotalModal() : BigDecimal.ZERO;
             int ukuranRiwayatSebelum = akun.getRiwayatTransaksi().size();
 
             // Execute on model
@@ -83,14 +85,14 @@ public class TradingService {
             }
 
             // Snapshot for rollback
-            double saldoSebelum = akun.getSaldo();
+            BigDecimal saldoSebelum = akun.getSaldo();
             Portfolio portfolioSebelum = akun.getPortfolio().get(saham.getKode());
 
             // If portfolio is null, we can't sell anyway, Akun.jualSaham will throw exception.
             // But we need to capture state if it exists.
             int jumlahPortfolioSebelum = 0;
-            double hargaBeliSebelum = 0;
-            double totalModalSebelum = 0;
+            BigDecimal hargaBeliSebelum = BigDecimal.ZERO;
+            BigDecimal totalModalSebelum = BigDecimal.ZERO;
 
             if (portfolioSebelum != null) {
                 jumlahPortfolioSebelum = portfolioSebelum.getJumlah();
@@ -121,9 +123,9 @@ public class TradingService {
         }
     }
 
-    private void rollbackBeliSaham(Akun akun, Saham saham, double saldoSebelum,
-                                          int jumlahPortfolioSebelum, double hargaBeliSebelum,
-                                          double totalModalSebelum, int ukuranRiwayatSebelum) {
+    private void rollbackBeliSaham(Akun akun, Saham saham, BigDecimal saldoSebelum,
+                                          int jumlahPortfolioSebelum, BigDecimal hargaBeliSebelum,
+                                          BigDecimal totalModalSebelum, int ukuranRiwayatSebelum) {
         // Restore saldo
         akun.setSaldo(saldoSebelum);
 
@@ -147,9 +149,9 @@ public class TradingService {
         }
     }
 
-    private void rollbackJualSaham(Akun akun, Saham saham, double saldoSebelum,
-                                          int jumlahPortfolioSebelum, double hargaBeliSebelum,
-                                          double totalModalSebelum, int ukuranRiwayatSebelum) {
+    private void rollbackJualSaham(Akun akun, Saham saham, BigDecimal saldoSebelum,
+                                          int jumlahPortfolioSebelum, BigDecimal hargaBeliSebelum,
+                                          BigDecimal totalModalSebelum, int ukuranRiwayatSebelum) {
         // Restore saldo
         akun.setSaldo(saldoSebelum);
 
