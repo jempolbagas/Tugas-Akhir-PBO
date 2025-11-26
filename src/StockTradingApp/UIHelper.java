@@ -1,6 +1,10 @@
 package StockTradingApp;
 
+import java.util.Scanner;
+
 class UIHelper {
+    private static Scanner scanner = new Scanner(System.in);
+
     public static void clearScreen() {
         System.out.print("\033[H\033[2J");
         System.out.flush();
@@ -25,7 +29,7 @@ class UIHelper {
     
     public static void pause() {
         System.out.print("\n[Tekan ENTER untuk melanjutkan...]");
-        try { System.in.read(); } catch (Exception e) {}
+        if (scanner.hasNextLine()) scanner.nextLine();
     }
 
     public static void showErrorAndExit(String message, Exception e) {

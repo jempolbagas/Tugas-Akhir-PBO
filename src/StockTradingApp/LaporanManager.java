@@ -1,10 +1,18 @@
 package StockTradingApp;
 
+import java.math.BigDecimal;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+
 class LaporanManager {
     public static void exportLaporan(Akun akun, PasarSaham pasar) {
         String filename = "Laporan_Trading_" + akun.getUsername() + ".txt";
         
-        try (java.io.PrintWriter writer = new java.io.PrintWriter(new java.io.FileWriter(filename))) {
+        try (PrintWriter writer = new PrintWriter(new FileWriter(filename))) {
             writer.println("═".repeat(100));
             writer.println(UIHelper.centerText("LAPORAN TRADING SAHAM DIGITAL", 100));
             writer.println("═".repeat(100));
@@ -25,14 +33,14 @@ class LaporanManager {
                 "Kode", "Nama Saham", "Jumlah", "Harga Beli", "Harga Skrg", "Nilai", "Profit/Loss");
             writer.println("─".repeat(100));
             
-            double totalNilai = akun.getSaldo();
-            double totalKeuntungan = 0;
+            BigDecimal totalNilai = akun.getSaldo();
+            BigDecimal totalKeuntungan = BigDecimal.ZERO;
             
             for (Portfolio port : akun.getPortfolio().values()) {
                 try {
                     Saham saham = pasar.getSaham(port.getKodeSaham());
-                    double nilaiSkrg = port.hitungNilaiSekarang(saham.getHargaSekarang());
-                    double profit = port.hitungKeuntungan(saham.getHargaSekarang());
+                    BigDecimal nilaiSkrg = port.hitungNilaiSekarang(saham.getHargaSekarang());
+                    BigDecimal profit = port.hitungKeuntungan(saham.getHargaSekarang());
                     
                     writer.printf("%-10s %-30s %,10d Rp %,12.2f Rp %,12.2f Rp %,12.2f %s Rp %,12.2f (%.2f%%)\n",
                         port.getKodeSaham(),
@@ -41,13 +49,13 @@ class LaporanManager {
                         port.getHargaBeli(),
                         saham.getHargaSekarang(),
                         nilaiSkrg,
-                        profit >= 0 ? "+" : "",
+                        profit.compareTo(BigDecimal.ZERO) >= 0 ? "+" : "",
                         profit,
                         port.hitungPersentaseKeuntungan(saham.getHargaSekarang())
                     );
                     
-                    totalNilai += nilaiSkrg;
-                    totalKeuntungan += profit;
+                    totalNilai = totalNilai.add(nilaiSkrg);
+                    totalKeuntungan = totalKeuntungan.add(profit);
                 } catch (SahamTidakDitemukanException e) {
                     writer.println("Error: " + e.getMessage());
                 }
@@ -61,20 +69,20 @@ class LaporanManager {
             writer.println("\n\nRIWAYAT TRANSAKSI:");
             writer.println("─".repeat(100));
             
-            java.util.ArrayList<Transaksi> riwayat = akun.getRiwayatTransaksi();
+            ArrayList<Transaksi> riwayat = akun.getRiwayatTransaksi();
             for (int i = riwayat.size() - 1; i >= 0 && i >= riwayat.size() - 20; i--) {
                 writer.println(riwayat.get(i));
             }
             
             writer.println("\n" + "═".repeat(100));
             writer.println(UIHelper.centerText("Laporan dibuat pada: " + 
-                java.time.LocalDateTime.now().format(
-                    java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss")), 100));
+                LocalDateTime.now().format(
+                    DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss")), 100));
             writer.println("═".repeat(100));
             
             System.out.println("\n✓ Laporan berhasil diekspor ke: " + filename);
             
-        } catch (java.io.IOException e) {
+        } catch (IOException e) {
             System.out.println("✗ Gagal membuat laporan: " + e.getMessage());
         }
     }
