@@ -17,14 +17,30 @@ import java.time.LocalDateTime;
 import java.util.HashMap;
 
 public class DataManager {
-    private static final String FILE_PATH = "neostock.json";
-    private static final String TEMP_FILE_PATH = "neostock.json.tmp";
+    private static final String DATA_DIR = "data";
+    private static final String FILE_PATH = DATA_DIR + File.separator + "neostock.json";
+    private static final String TEMP_FILE_PATH = DATA_DIR + File.separator + "neostock.json.tmp";
     private Gson gson;
 
-    public DataManager() {
+    public DataManager() throws IOException {
         GsonBuilder gsonBuilder = new GsonBuilder();
         gsonBuilder.registerTypeAdapter(LocalDateTime.class, new LocalDateTimeAdapter());
         this.gson = gsonBuilder.setPrettyPrinting().create();
+
+        File directory = new File(DATA_DIR);
+        if (!directory.exists()) {
+            if (!directory.mkdirs()) {
+                throw new IOException("Gagal membuat direktori data: " + DATA_DIR);
+            }
+        }
+    }
+
+    /**
+     * Returns the file path used for the database file.
+     * @return the full path to the database file
+     */
+    public static String getFilePath() {
+        return FILE_PATH;
     }
 
     public void saveData(HashMap<String, Akun> data) throws IOException {
@@ -37,6 +53,11 @@ public class DataManager {
     }
 
     public HashMap<String, Akun> loadData() throws IOException, JsonSyntaxException {
+        File file = new File(FILE_PATH);
+        if (!file.exists()) {
+            throw new java.io.FileNotFoundException("File database belum dibuat");
+        }
+
         try (FileReader reader = new FileReader(FILE_PATH)) {
             Type type = new TypeToken<HashMap<String, Akun>>(){}.getType();
             return gson.fromJson(reader, type);

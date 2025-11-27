@@ -17,9 +17,9 @@ public class SistemAutentikasi {
     private java.util.List<String> notifications;
     
     public SistemAutentikasi() throws DatabaseLoadException, DatabaseSaveException {
-        this.dataManager = new DataManager();
         this.notifications = new java.util.ArrayList<>();
         try {
+            this.dataManager = new DataManager();
             this.database = dataManager.loadData();
         } catch (java.io.FileNotFoundException e) {
             notifications.add("File data tidak ditemukan. Membuat file baru.");
@@ -36,10 +36,18 @@ public class SistemAutentikasi {
     }
 
     private void backupCorruptedData() {
-        File source = new File("neostock.json");
-        File dest = new File("neostock.json.corrupted." + System.currentTimeMillis());
+        String filePath = DataManager.getFilePath();
+
+        File source = new File(filePath);
+        File dest = new File(filePath + ".corrupted." + System.currentTimeMillis());
+
         if (source.exists()) {
-            source.renameTo(dest);
+            boolean renamed = source.renameTo(dest);
+            if (renamed) {
+                System.out.println("File database rusak berhasil di-backup ke: " + dest.getName());
+            } else {
+                System.err.println("Gagal mem-backup file database rusak.");
+            }
         }
     }
 
