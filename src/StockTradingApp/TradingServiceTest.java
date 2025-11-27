@@ -1,9 +1,9 @@
 package StockTradingApp;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.*;
 import java.math.BigDecimal;
-import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
 public class TradingServiceTest {
@@ -14,7 +14,7 @@ public class TradingServiceTest {
     private Akun testAkun;
     private Saham testSaham;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         mockMarketService = mock(MarketService.class);
         mockAuth = mock(SistemAutentikasi.class);
