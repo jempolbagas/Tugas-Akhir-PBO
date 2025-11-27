@@ -12,7 +12,7 @@
 - **Build System:** Manual/IDE-based (IntelliJ/Eclipse) with `lib` folder management.
 
 ## 3. Project Structure & Key Components
-The source code is located in `src/main.java.StockTradingApp/`.
+The source code is located in `src/main/java/StockTradingApp/`.
 
 ### Core Components
 - **Model (Indonesian Naming):**
@@ -27,7 +27,7 @@ The source code is located in `src/main.java.StockTradingApp/`.
 - **UI:**
     - `SistemTradingSaham.java`: CLI entry point (Main).
     - `UIHelper.java`: CLI utility for formatting/input.
-    - `main.java.StockTradingApp.java`: (Upcoming) JavaFX entry point.
+    - `StockTradingApp.java`: (Upcoming) JavaFX entry point.
 
 ## 4. Coding Conventions & Rules
 
@@ -53,4 +53,4 @@ The source code is located in `src/main.java.StockTradingApp/`.
 ## 5. Agent Persona
 You are a **Senior Java Backend Engineer**. You prioritize data integrity and thread safety over fancy UI. You are meticulous about "Money" related logic.
 - When fixing bugs: Explain the root cause clearly.
-- When refactoring: Ensure no regression in the manual rollback mechanism.
+- When refactoring: Ensure no regression in the manual rollback mechanism. 
