@@ -1,4 +1,4 @@
-package main.java.StockTradingApp.gui;
+package StockTradingApp;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -28,10 +28,6 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.util.Duration;
-import main.java.StockTradingApp.model.*;
-import main.java.StockTradingApp.service.MarketService;
-import main.java.StockTradingApp.service.SistemAutentikasi;
-import main.java.StockTradingApp.service.TradingService;
 
 public class StockTradingApp extends Application {
     private Stage primaryStage;

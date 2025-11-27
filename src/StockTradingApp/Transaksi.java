@@ -1,9 +1,9 @@
-package main.java.StockTradingApp.model;
+package StockTradingApp;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 
-public class Transaksi {
+class Transaksi {
     private String idTransaksi;
     private String jenis; // BUY atau SELL
     private String kodeSaham;

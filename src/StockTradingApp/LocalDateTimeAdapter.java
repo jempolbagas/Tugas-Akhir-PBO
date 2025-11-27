@@ -1,4 +1,4 @@
-package main.java.StockTradingApp.service;
+package StockTradingApp;
 
 import com.google.gson.TypeAdapter;
 import com.google.gson.stream.JsonReader;

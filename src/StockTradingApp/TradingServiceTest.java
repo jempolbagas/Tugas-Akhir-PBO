@@ -1,12 +1,5 @@
-package test.java.StockTradingApp.service;
+package StockTradingApp;
 
-import main.java.StockTradingApp.exception.SahamTidakDitemukanException;
-import main.java.StockTradingApp.model.Akun;
-import main.java.StockTradingApp.model.Saham;
-import main.java.StockTradingApp.model.TradeResult;
-import main.java.StockTradingApp.service.MarketService;
-import main.java.StockTradingApp.service.SistemAutentikasi;
-import main.java.StockTradingApp.service.TradingService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;

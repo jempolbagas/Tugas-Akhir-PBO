@@ -1,8 +1,4 @@
-package main.java.StockTradingApp.service;
-
-import main.java.StockTradingApp.exception.SahamTidakDitemukanException;
-import main.java.StockTradingApp.model.PasarSaham;
-import main.java.StockTradingApp.model.Saham;
+package StockTradingApp;
 
 public class MarketService {
     private final PasarSaham pasar;

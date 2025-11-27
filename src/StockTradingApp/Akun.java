@@ -1,11 +1,9 @@
-package main.java.StockTradingApp.model;
-
-import main.java.StockTradingApp.exception.*;
+package StockTradingApp;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 
-public class Akun {
+class Akun {
     private String username;
     private String password;
     private String namaLengkap;

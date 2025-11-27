@@ -1,8 +1,4 @@
-package main.java.StockTradingApp.service;
-
-import main.java.StockTradingApp.exception.SahamTidakDitemukanException;
-import main.java.StockTradingApp.gui.UIHelper;
-import main.java.StockTradingApp.model.*;
+package StockTradingApp;
 
 import java.math.BigDecimal;
 import java.io.FileWriter;
@@ -12,7 +8,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 
-public class LaporanManager {
+class LaporanManager {
     public static void exportLaporan(Akun akun, PasarSaham pasar) {
         String filename = "Laporan_Trading_" + akun.getUsername() + ".txt";
         

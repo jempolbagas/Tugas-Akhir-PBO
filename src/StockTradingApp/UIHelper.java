@@ -1,8 +1,8 @@
-package main.java.StockTradingApp.gui;
+package StockTradingApp;
 
 import java.util.Scanner;
 
-public class UIHelper {
+class UIHelper {
     private static Scanner scanner = new Scanner(System.in);
 
     public static void clearScreen() {

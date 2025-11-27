@@ -1,4 +1,4 @@
-package main.java.StockTradingApp.model;
+package StockTradingApp;
 
 public class TradeResult {
     private final boolean success;

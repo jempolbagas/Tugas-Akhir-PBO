@@ -1,11 +1,9 @@
-package main.java.StockTradingApp.service;
+package StockTradingApp;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
-import main.java.StockTradingApp.model.Akun;
-
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
