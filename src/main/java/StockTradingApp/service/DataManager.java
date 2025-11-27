@@ -19,7 +19,7 @@ import java.util.HashMap;
 public class DataManager {
     private static final String DATA_DIR = "data";
     private static final String FILE_PATH = DATA_DIR + File.separator + "neostock.json";
-    private static final String TEMP_FILE_PATH =  DATA_DIR + File.separator + "neostock.json.tmp";
+    private static final String TEMP_FILE_PATH = DATA_DIR + File.separator + "neostock.json.tmp";
     private Gson gson;
 
     public DataManager() {
