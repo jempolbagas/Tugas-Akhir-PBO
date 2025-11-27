@@ -22,15 +22,25 @@ public class DataManager {
     private static final String TEMP_FILE_PATH = DATA_DIR + File.separator + "neostock.json.tmp";
     private Gson gson;
 
-    public DataManager() {
+    public DataManager() throws IOException {
         GsonBuilder gsonBuilder = new GsonBuilder();
         gsonBuilder.registerTypeAdapter(LocalDateTime.class, new LocalDateTimeAdapter());
         this.gson = gsonBuilder.setPrettyPrinting().create();
 
         File directory = new File(DATA_DIR);
         if (!directory.exists()) {
-            directory.mkdirs();
+            if (!directory.mkdirs()) {
+                throw new IOException("Gagal membuat direktori data: " + DATA_DIR);
+            }
         }
+    }
+
+    /**
+     * Returns the file path used for the database file.
+     * @return the full path to the database file
+     */
+    public static String getFilePath() {
+        return FILE_PATH;
     }
 
     public void saveData(HashMap<String, Akun> data) throws IOException {
