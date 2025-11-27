@@ -17,9 +17,9 @@ public class SistemAutentikasi {
     private java.util.List<String> notifications;
     
     public SistemAutentikasi() throws DatabaseLoadException, DatabaseSaveException {
-        this.dataManager = new DataManager();
         this.notifications = new java.util.ArrayList<>();
         try {
+            this.dataManager = new DataManager();
             this.database = dataManager.loadData();
         } catch (java.io.FileNotFoundException e) {
             notifications.add("File data tidak ditemukan. Membuat file baru.");
@@ -36,7 +36,7 @@ public class SistemAutentikasi {
     }
 
     private void backupCorruptedData() {
-        String filePath = "data" + File.separator + "neostock.json";
+        String filePath = DataManager.getFilePath();
 
         File source = new File(filePath);
         File dest = new File(filePath + ".corrupted." + System.currentTimeMillis());
