@@ -1,9 +1,9 @@
-package StockTradingApp;
+package main.java.StockTradingApp.model;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 
-class Portfolio {
+public class Portfolio {
     private static final BigDecimal ONE_HUNDRED = new BigDecimal("100");
 
     private String kodeSaham;

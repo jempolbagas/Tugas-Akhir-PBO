@@ -12,7 +12,7 @@
 - **Build System:** Manual/IDE-based (IntelliJ/Eclipse) with `lib` folder management.
 
 ## 3. Project Structure & Key Components
-The source code is located in `src/StockTradingApp/`.
+The source code is located in `src/main.java.StockTradingApp/`.
 
 ### Core Components
 - **Model (Indonesian Naming):**
@@ -27,7 +27,7 @@ The source code is located in `src/StockTradingApp/`.
 - **UI:**
     - `SistemTradingSaham.java`: CLI entry point (Main).
     - `UIHelper.java`: CLI utility for formatting/input.
-    - `StockTradingApp.java`: (Upcoming) JavaFX entry point.
+    - `main.java.StockTradingApp.java`: (Upcoming) JavaFX entry point.
 
 ## 4. Coding Conventions & Rules
 

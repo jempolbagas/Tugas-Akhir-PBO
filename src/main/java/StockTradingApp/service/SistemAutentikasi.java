@@ -1,11 +1,17 @@
-package StockTradingApp;
+package main.java.StockTradingApp.service;
 
 import java.io.IOException;
 import java.math.BigDecimal;
 import com.google.gson.JsonSyntaxException;
+import main.java.StockTradingApp.exception.AkunTidakDitemukanException;
+import main.java.StockTradingApp.exception.DatabaseLoadException;
+import main.java.StockTradingApp.exception.DatabaseSaveException;
+import main.java.StockTradingApp.exception.PasswordSalahException;
+import main.java.StockTradingApp.model.Akun;
+
 import java.io.File;
 
-class SistemAutentikasi {
+public class SistemAutentikasi {
     private java.util.HashMap<String, Akun> database;
     private DataManager dataManager;
     private java.util.List<String> notifications;

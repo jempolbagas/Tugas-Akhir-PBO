@@ -1,4 +1,11 @@
-package StockTradingApp;
+package main.java.StockTradingApp.cli;
+
+import main.java.StockTradingApp.gui.UIHelper;
+import main.java.StockTradingApp.model.*;
+import main.java.StockTradingApp.service.LaporanManager;
+import main.java.StockTradingApp.service.MarketService;
+import main.java.StockTradingApp.service.SistemAutentikasi;
+import main.java.StockTradingApp.service.TradingService;
 
 import java.math.BigDecimal;
 import java.time.format.DateTimeFormatter;

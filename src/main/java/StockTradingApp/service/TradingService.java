@@ -1,4 +1,13 @@
-package StockTradingApp;
+package main.java.StockTradingApp.service;
+
+import main.java.StockTradingApp.exception.DatabaseSaveException;
+import main.java.StockTradingApp.exception.JumlahSahamTidakValidException;
+import main.java.StockTradingApp.exception.SahamTidakDitemukanException;
+import main.java.StockTradingApp.exception.SaldoTidakCukupException;
+import main.java.StockTradingApp.model.Akun;
+import main.java.StockTradingApp.model.Portfolio;
+import main.java.StockTradingApp.model.Saham;
+import main.java.StockTradingApp.model.TradeResult;
 
 import java.math.BigDecimal;
 
