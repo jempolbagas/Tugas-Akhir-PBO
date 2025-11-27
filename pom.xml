@@ -109,7 +109,7 @@
                 <artifactId>javafx-maven-plugin</artifactId>
                 <version>0.0.8</version>
                 <configuration>
-                    <mainClass>StockTradingApp.StockTradingApp</mainClass>
+                    <mainClass>main.java.StockTradingApp.gui.StockTradingApp</mainClass>
                 </configuration>
             </plugin>
         </plugins>

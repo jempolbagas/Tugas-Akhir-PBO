@@ -1,9 +1,9 @@
-package StockTradingApp;
+package main.java.StockTradingApp.model;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 
-class Saham {
+public class Saham {
     private static final BigDecimal ONE_HUNDRED = new BigDecimal("100");
     private static final BigDecimal MINIMUM_PRICE = new BigDecimal("50");
 

@@ -1,6 +1,8 @@
-package StockTradingApp;
+package main.java.StockTradingApp.model;
 
-class PasarSaham {
+import main.java.StockTradingApp.exception.SahamTidakDitemukanException;
+
+public class PasarSaham {
     private java.util.HashMap<String, Saham> daftarSaham;
     private java.util.Random random;
     private boolean pasarBuka;

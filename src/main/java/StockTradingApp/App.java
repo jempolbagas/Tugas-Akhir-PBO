@@ -1,4 +1,4 @@
-package StockTradingApp;
+package main.java.StockTradingApp;
 
 public class App {
     public static void main(String[] args) throws Exception {
