@@ -36,10 +36,18 @@ public class SistemAutentikasi {
     }
 
     private void backupCorruptedData() {
-        File source = new File("neostock.json");
-        File dest = new File("neostock.json.corrupted." + System.currentTimeMillis());
+        String filePath = "data" + File.separator + "neostock.json";
+
+        File source = new File(filePath);
+        File dest = new File(filePath + ".corrupted." + System.currentTimeMillis());
+
         if (source.exists()) {
-            source.renameTo(dest);
+            boolean renamed = source.renameTo(dest);
+            if (renamed) {
+                System.out.println("File database rusak berhasil di-backup ke: " + dest.getName());
+            } else {
+                System.err.println("Gagal mem-backup file database rusak.");
+            }
         }
     }
 
