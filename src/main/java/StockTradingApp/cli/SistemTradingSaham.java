@@ -111,11 +111,11 @@ public class SistemTradingSaham {
                 default:
                     System.out.println("Pilihan tidak valid!");
             }
+            if (pilihan != 3) UIHelper.pause();
         } catch (NumberFormatException e) {
             System.out.println("Input harus berupa angka!");
         }
 
-        UIHelper.pause();
         return true;
     }
 
@@ -256,12 +256,9 @@ public class SistemTradingSaham {
                 default:
                     System.out.println("Pilihan tidak valid!");
             }
+            if (pilihan != 1) UIHelper.pause();
         } catch (NumberFormatException e) {
             System.out.println("Input harus berupa angka!");
-        }
-
-        if (akunAktif != null) {
-            UIHelper.pause();
         }
         return true;
     }
