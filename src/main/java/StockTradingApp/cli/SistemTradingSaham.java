@@ -181,21 +181,7 @@ public class SistemTradingSaham {
     private static void lihatHargaSahamGuest() {
         UIHelper.tampilkanHeader("DAFTAR HARGA SAHAM (REAL-TIME)");
 
-        System.out.println("\n┌────────────────────────────────────────────────────────────────────────────────┐");
-        System.out.printf("│ %-8s %-25s %-15s %-12s %-8s %-12s │\n",
-                "Kode", "Nama Saham", "Sektor", "Harga", "Status", "Perubahan");
-        System.out.println("├────────────────────────────────────────────────────────────────────────────────┤");
-
-        for (Saham saham : marketService.getAllSaham()) {
-            System.out.printf("│ %-8s %-25s %-15s Rp %,10.2f %s %-12s │\n",
-                    saham.getKode(),
-                    saham.getNamaSaham(),
-                    saham.getSektor(),
-                    saham.getHargaSekarang(),
-                    saham.getStatusWarna(),
-                    saham.getPerubahanFormatted());
-        }
-        System.out.println("└────────────────────────────────────────────────────────────────────────────────┘");
+        tampilkanTabelSaham();
 
         System.out.println("\n💡 Silakan login untuk mulai trading!");
     }
@@ -230,7 +216,7 @@ public class SistemTradingSaham {
 
             switch (pilihan) {
                 case 1:
-                    lihatDaftarSaham();
+                    lihatDaftarSahamLive();
                     break;
                 case 2:
                     beliSaham();
@@ -269,9 +255,27 @@ public class SistemTradingSaham {
         return true;
     }
 
-    private static void lihatDaftarSaham() {
-        UIHelper.tampilkanHeader("DAFTAR SAHAM - REAL TIME UPDATE");
+    private static void lihatDaftarSahamLive() {
+        Runnable renderTask = () -> {
+            UIHelper.clearScreen();
+            UIHelper.tampilkanHeader("LIVE MARKET - REAL TIME UPDATE");
+            tampilkanTabelSaham();
+            System.out.println("\n💡 Layar akan refresh otomatis saat harga berubah (Live Mode)");
+            System.out.println("🟢 = Naik | 🔴 = Turun | ⚪ = Stabil");
+            System.out.println("\n[Tekan ENTER untuk kembali ke menu...]");
+        };
 
+        // Initial render
+        renderTask.run();
+
+        marketService.addListener(renderTask);
+
+        scanner.nextLine();
+
+        marketService.removeListener(renderTask);
+    }
+
+    private static void tampilkanTabelSaham() {
         System.out.println("\n┌────────────────────────────────────────────────────────────────────────────────┐");
         System.out.printf("│ %-8s %-25s %-15s %-12s %-8s %-12s │\n",
                 "Kode", "Nama Saham", "Sektor", "Harga", "Status", "Perubahan");
@@ -287,9 +291,6 @@ public class SistemTradingSaham {
                     saham.getPerubahanFormatted());
         }
         System.out.println("└────────────────────────────────────────────────────────────────────────────────┘");
-
-        System.out.println("\n💡 Harga diperbarui otomatis setiap 10 detik");
-        System.out.println("🟢 = Naik | 🔴 = Turun | ⚪ = Stabil");
     }
 
     private static void beliSaham() {
