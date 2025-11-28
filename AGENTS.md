@@ -6,10 +6,10 @@
 **Current State:** Hybrid CLI/GUI. The core logic handles transaction atomicity manually.
 
 ## 2. Tech Stack & Environment
-- **Language:** Java (Modular, ensure compatibility with Java 11+).
-- **GUI Framework:** JavaFX (refer to `lib/` for dependencies).
-- **Persistence:** JSON-based using **Google Gson** (`lib/gson-2.8.6.jar`).
-- **Build System:** Manual/IDE-based (IntelliJ/Eclipse) with `lib` folder management.
+- **Language:** Java 17 (Enforced by Maven).
+- **GUI Framework:** JavaFX (Managed via Maven).
+- **Persistence:** JSON-based using **Google Gson** (Managed via Maven).
+- **Build System:** **Maven** (`pom.xml`). Dependencies are automatically managed; there is no manual `lib` folder.
 
 ## 3. Project Structure & Key Components
 The source code is located in `src/main/java/StockTradingApp/`.
@@ -27,7 +27,7 @@ The source code is located in `src/main/java/StockTradingApp/`.
 - **UI:**
     - `SistemTradingSaham.java`: CLI entry point (Main).
     - `UIHelper.java`: CLI utility for formatting/input.
-    - `StockTradingApp.java`: (Upcoming) JavaFX entry point.
+    - `StockTradingApp.java`: JavaFX entry point (Fully Implemented). Contains splash screen, auth forms, and dashboards.
 
 ## 4. Coding Conventions & Rules
 
@@ -36,8 +36,8 @@ The source code is located in `src/main/java/StockTradingApp/`.
     - Any modification to `Akun` (balance/portfolio) MUST be followed by a `auth.saveData()` call.
     - If `saveData()` fails, **YOU MUST** execute the corresponding rollback method to revert memory state. **Do not remove the rollback logic.**
 2.  **Currency Handling:**
-    - *Current State:* Uses `double` for financial calculations.
-    - *Refactoring Goal:* When creating NEW features or refactoring, prefer using `java.math.BigDecimal` for precision.
+    - *Current State:* Uses `java.math.BigDecimal` for all financial calculations.
+    - *Refactoring Goal:* Maintain strict usage of `BigDecimal` to prevent floating-point errors.
 3.  **Market Logic:**
     - Stock prices are currently random. Future logic should implement "Market Trends" or "Limit Orders".
 
@@ -47,8 +47,8 @@ The source code is located in `src/main/java/StockTradingApp/`.
 - **Variables:** mixed is acceptable, but prefer explicit names (e.g., `jumlahLembar`, `saldoSebelum`).
 
 ### C. Testing Guidelines
-- Currently, there are no automated tests.
-- **Agent Task:** When asked to implement a feature, ALWAYS create a corresponding JUnit test case to verify logic, especially for edge cases (e.g., negative balance, selling more than owned).
+- **Current State:** JUnit 5 and Mockito tests exist for `TradingService`.
+- **Agent Task:** When asked to implement a feature, ALWAYS create or update the corresponding JUnit test case to verify logic, especially for edge cases (e.g., negative balance, selling more than owned).
 
 ## 5. Agent Persona
 You are a **Senior Java Backend Engineer**. You prioritize data integrity and thread safety over fancy UI. You are meticulous about "Money" related logic.
