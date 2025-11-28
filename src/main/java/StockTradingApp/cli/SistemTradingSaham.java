@@ -179,11 +179,22 @@ public class SistemTradingSaham {
     }
 
     private static void lihatHargaSahamGuest() {
-        UIHelper.tampilkanHeader("DAFTAR HARGA SAHAM (REAL-TIME)");
+        Runnable renderTask = () -> {
+            UIHelper.clearScreen();
+            UIHelper.tampilkanHeader("DAFTAR HARGA SAHAM (REAL-TIME)");
+            tampilkanTabelSaham();
+            System.out.println("\n💡 Silakan login untuk mulai trading!");
+            System.out.println("\n[Tekan ENTER untuk kembali ke menu utama...]");
+        };
 
-        tampilkanTabelSaham();
+        // Initial render
+        renderTask.run();
 
-        System.out.println("\n💡 Silakan login untuk mulai trading!");
+        marketService.addListener(renderTask);
+
+        scanner.nextLine();
+
+        marketService.removeListener(renderTask);
     }
 
     private static boolean menuTrading() {
