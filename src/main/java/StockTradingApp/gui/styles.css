@@ -316,3 +316,28 @@
     -fx-text-fill: white;
     -fx-font-family: 'Segoe UI', sans-serif;
 }
+
+/* Cell Styling for TableView */
+.price-cell {
+    -fx-text-fill: #00ccff;
+    -fx-font-weight: bold;
+}
+
+.neutral-cell {
+    -fx-text-fill: white;
+}
+
+.profit-cell {
+    -fx-text-fill: #00ff88;
+    -fx-font-weight: bold;
+}
+
+.loss-cell {
+    -fx-text-fill: #ff4444;
+    -fx-font-weight: bold;
+}
+
+.na-cell {
+    -fx-text-fill: #cccccc;
+    -fx-font-style: italic;
+}
