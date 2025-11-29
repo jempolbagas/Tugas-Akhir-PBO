@@ -783,9 +783,12 @@ public class StockTradingApp extends Application {
             @Override
             protected void updateItem(BigDecimal item, boolean empty) {
                 super.updateItem(item, empty);
-                getStyleClass().removeAll("profit-cell", "loss-cell");
-                if (empty || item == null) {
+                getStyleClass().removeAll("profit-cell", "loss-cell", "na-cell");
+                if (empty) {
                     setText(null);
+                } else if (item == null) {
+                    setText("N/A");
+                    getStyleClass().add("na-cell");
                 } else {
                     String sign = item.compareTo(BigDecimal.ZERO) >= 0 ? "+" : "";
                     setText(String.format("%s%.2f%%", sign, item));
