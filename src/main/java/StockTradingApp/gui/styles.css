@@ -27,7 +27,7 @@
 }
 
 .splash-progress {
-    -fx-progress-color: linear-gradient(to right, #00ff88, #00ccff);
+    -fx-progress-color: #00ff88;
 }
 
 .splash-loading {
