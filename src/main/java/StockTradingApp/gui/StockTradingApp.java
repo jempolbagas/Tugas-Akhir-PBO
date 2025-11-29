@@ -55,6 +55,9 @@ public class StockTradingApp extends Application {
     private TableView<Saham> marketTable;
     private TableView<Portfolio> portfolioTable;
     private static final NumberFormat IDR_FORMAT = NumberFormat.getCurrencyInstance(new Locale("id", "ID"));
+    
+    // Listener stored as field for proper cleanup
+    private Runnable marketListener;
 
     @Override
     public void start(Stage primaryStage) {
@@ -73,12 +76,13 @@ public class StockTradingApp extends Application {
             }
 
             // Register reactive listener for market updates
-            marketService.addListener(() -> {
+            marketListener = () -> {
                 Platform.runLater(() -> {
                     if (marketTable != null) marketTable.refresh();
                     if (portfolioTable != null) portfolioTable.refresh();
                 });
-            });
+            };
+            marketService.addListener(marketListener);
 
         } catch (Exception e) {
             showAlert("Critical Error", "Failed to load or save data: " + e.getMessage(), Alert.AlertType.ERROR);
@@ -411,38 +415,11 @@ public class StockTradingApp extends Application {
 
         TableColumn<Saham, BigDecimal> colHarga = new TableColumn<>("Harga");
         colHarga.setCellValueFactory(data -> new SimpleObjectProperty<>(data.getValue().getHargaSekarang()));
-        colHarga.setCellFactory(column -> new TableCell<Saham, BigDecimal>() {
-            @Override
-            protected void updateItem(BigDecimal item, boolean empty) {
-                super.updateItem(item, empty);
-                if (empty || item == null) {
-                    setText(null);
-                } else {
-                    setText(IDR_FORMAT.format(item));
-                    setStyle("-fx-text-fill: #00ccff; -fx-font-weight: bold;");
-                }
-            }
-        });
+        colHarga.setCellFactory(createCurrencyCell("price-cell"));
 
         TableColumn<Saham, BigDecimal> colPerubahan = new TableColumn<>("Perubahan");
         colPerubahan.setCellValueFactory(data -> new SimpleObjectProperty<>(data.getValue().getPerubahan()));
-        colPerubahan.setCellFactory(column -> new TableCell<Saham, BigDecimal>() {
-            @Override
-            protected void updateItem(BigDecimal item, boolean empty) {
-                super.updateItem(item, empty);
-                if (empty || item == null) {
-                    setText(null);
-                } else {
-                    String sign = item.compareTo(BigDecimal.ZERO) >= 0 ? "+" : "";
-                    setText(String.format("%s%.2f%%", sign, item));
-                    if (item.compareTo(BigDecimal.ZERO) >= 0) {
-                        setStyle("-fx-text-fill: #00ff88; -fx-font-weight: bold;");
-                    } else {
-                        setStyle("-fx-text-fill: #ff4444; -fx-font-weight: bold;");
-                    }
-                }
-            }
-        });
+        colPerubahan.setCellFactory(createPercentageChangeCell());
 
         marketTable.getColumns().addAll(colKode, colNama, colSektor, colHarga, colPerubahan);
         marketTable.setItems(FXCollections.observableArrayList(marketService.getAllSaham()));
@@ -481,18 +458,7 @@ public class StockTradingApp extends Application {
 
         TableColumn<Portfolio, BigDecimal> colAvgPrice = new TableColumn<>("Avg Price");
         colAvgPrice.setCellValueFactory(data -> new SimpleObjectProperty<>(data.getValue().getHargaBeli()));
-        colAvgPrice.setCellFactory(column -> new TableCell<Portfolio, BigDecimal>() {
-            @Override
-            protected void updateItem(BigDecimal item, boolean empty) {
-                super.updateItem(item, empty);
-                if (empty || item == null) {
-                    setText(null);
-                } else {
-                    setText(IDR_FORMAT.format(item));
-                    setStyle("-fx-text-fill: white;");
-                }
-            }
-        });
+        colAvgPrice.setCellFactory(createCurrencyCell("neutral-cell"));
 
         // Current Price (Dynamic)
         TableColumn<Portfolio, BigDecimal> colCurrentPrice = new TableColumn<>("Current Price");
@@ -501,21 +467,11 @@ public class StockTradingApp extends Application {
                 Saham saham = marketService.getSaham(data.getValue().getKodeSaham());
                 return new SimpleObjectProperty<>(saham.getHargaSekarang());
             } catch (Exception e) {
-                return new SimpleObjectProperty<>(BigDecimal.ZERO);
+                System.err.println("Error fetching saham for current price: " + e.getMessage());
+                return new SimpleObjectProperty<>(null);
             }
         });
-        colCurrentPrice.setCellFactory(column -> new TableCell<Portfolio, BigDecimal>() {
-            @Override
-            protected void updateItem(BigDecimal item, boolean empty) {
-                super.updateItem(item, empty);
-                if (empty || item == null) {
-                    setText(null);
-                } else {
-                    setText(IDR_FORMAT.format(item));
-                    setStyle("-fx-text-fill: #00ccff; -fx-font-weight: bold;");
-                }
-            }
-        });
+        colCurrentPrice.setCellFactory(createCurrencyCell("price-cell"));
 
         // Profit/Loss (Dynamic)
         TableColumn<Portfolio, BigDecimal> colProfit = new TableColumn<>("Profit/Loss");
@@ -524,25 +480,11 @@ public class StockTradingApp extends Application {
                 Saham saham = marketService.getSaham(data.getValue().getKodeSaham());
                 return new SimpleObjectProperty<>(data.getValue().hitungKeuntungan(saham.getHargaSekarang()));
             } catch (Exception e) {
-                return new SimpleObjectProperty<>(BigDecimal.ZERO);
+                System.err.println("Error fetching saham for profit/loss: " + e.getMessage());
+                return new SimpleObjectProperty<>(null);
             }
         });
-        colProfit.setCellFactory(column -> new TableCell<Portfolio, BigDecimal>() {
-            @Override
-            protected void updateItem(BigDecimal item, boolean empty) {
-                super.updateItem(item, empty);
-                if (empty || item == null) {
-                    setText(null);
-                } else {
-                    setText(IDR_FORMAT.format(item));
-                    if (item.compareTo(BigDecimal.ZERO) >= 0) {
-                        setStyle("-fx-text-fill: #00ff88; -fx-font-weight: bold;");
-                    } else {
-                        setStyle("-fx-text-fill: #ff4444; -fx-font-weight: bold;");
-                    }
-                }
-            }
-        });
+        colProfit.setCellFactory(createProfitLossCell());
 
         portfolioTable.getColumns().addAll(colTicker, colName, colLot, colAvgPrice, colCurrentPrice, colProfit);
         portfolioTable.setItems(FXCollections.observableArrayList(akunAktif.getPortfolio().values()));
@@ -781,6 +723,82 @@ public class StockTradingApp extends Application {
         return pf;
     }
 
+    /**
+     * Creates a reusable currency cell factory for TableView.
+     * @param styleClass CSS style class for the cell (e.g., "price-cell", "neutral-cell")
+     * @return TableCell factory for BigDecimal currency formatting
+     */
+    private <T> javafx.util.Callback<TableColumn<T, BigDecimal>, TableCell<T, BigDecimal>> createCurrencyCell(String styleClass) {
+        return column -> new TableCell<T, BigDecimal>() {
+            @Override
+            protected void updateItem(BigDecimal item, boolean empty) {
+                super.updateItem(item, empty);
+                getStyleClass().removeAll("price-cell", "neutral-cell", "profit-cell", "loss-cell", "na-cell");
+                if (empty) {
+                    setText(null);
+                } else if (item == null) {
+                    setText("N/A");
+                    getStyleClass().add("na-cell");
+                } else {
+                    setText(IDR_FORMAT.format(item));
+                    getStyleClass().add(styleClass);
+                }
+            }
+        };
+    }
+
+    /**
+     * Creates a reusable profit/loss cell factory for TableView with conditional styling.
+     * @return TableCell factory for BigDecimal with profit (green) / loss (red) styling
+     */
+    private <T> javafx.util.Callback<TableColumn<T, BigDecimal>, TableCell<T, BigDecimal>> createProfitLossCell() {
+        return column -> new TableCell<T, BigDecimal>() {
+            @Override
+            protected void updateItem(BigDecimal item, boolean empty) {
+                super.updateItem(item, empty);
+                getStyleClass().removeAll("profit-cell", "loss-cell", "na-cell");
+                if (empty) {
+                    setText(null);
+                } else if (item == null) {
+                    setText("N/A");
+                    getStyleClass().add("na-cell");
+                } else {
+                    setText(IDR_FORMAT.format(item));
+                    if (item.compareTo(BigDecimal.ZERO) >= 0) {
+                        getStyleClass().add("profit-cell");
+                    } else {
+                        getStyleClass().add("loss-cell");
+                    }
+                }
+            }
+        };
+    }
+
+    /**
+     * Creates a reusable percentage change cell factory for TableView with conditional styling.
+     * @return TableCell factory for BigDecimal percentage with profit (green) / loss (red) styling
+     */
+    private <T> javafx.util.Callback<TableColumn<T, BigDecimal>, TableCell<T, BigDecimal>> createPercentageChangeCell() {
+        return column -> new TableCell<T, BigDecimal>() {
+            @Override
+            protected void updateItem(BigDecimal item, boolean empty) {
+                super.updateItem(item, empty);
+                getStyleClass().removeAll("profit-cell", "loss-cell");
+                if (empty || item == null) {
+                    setText(null);
+                } else {
+                    String sign = item.compareTo(BigDecimal.ZERO) >= 0 ? "+" : "";
+                    setText(String.format("%s%.2f%%", sign, item));
+                    if (item.compareTo(BigDecimal.ZERO) >= 0) {
+                        getStyleClass().add("profit-cell");
+                    } else {
+                        getStyleClass().add("loss-cell");
+                    }
+                }
+            }
+        };
+    }
+
     private Label createFormLabel(String text) {
         Label label = new Label(text);
         label.setStyle("-fx-font-family: 'Segoe UI'; -fx-text-fill: #8888ff; -fx-font-size: 12px; -fx-font-weight: bold;");
@@ -798,6 +816,17 @@ public class StockTradingApp extends Application {
         dialogPane.setStyle("-fx-background-color: #1a1a2e; -fx-border-color: #444477; -fx-border-radius: 4; -fx-background-radius: 4; -fx-text-fill: white;");
 
         alert.showAndWait();
+    }
+
+    @Override
+    public void stop() {
+        // Clean up listener to prevent memory leak
+        if (marketService != null && marketListener != null) {
+            marketService.removeListener(marketListener);
+        }
+        if (marketService != null) {
+            marketService.stopMarketUpdates();
+        }
     }
 
     public static void main(String[] args) {
