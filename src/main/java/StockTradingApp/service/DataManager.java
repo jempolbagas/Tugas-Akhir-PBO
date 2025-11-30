@@ -53,7 +53,7 @@ public class DataManager {
         Files.move(tempFile.toPath(), finalFile.toPath(), StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
     }
 
-    public HashMap<String, Akun> loadData() throws IOException, JsonSyntaxException {
+    public Map<String, Akun> loadData() throws IOException, JsonSyntaxException {
         File file = new File(FILE_PATH);
         if (!file.exists()) {
             throw new java.io.FileNotFoundException("File database belum dibuat");
