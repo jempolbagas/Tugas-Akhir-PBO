@@ -108,7 +108,6 @@ public class SahamHistoryTest {
     @Test
     public void testConcurrentHistoryAccess() throws InterruptedException {
         Saham saham = new Saham("TEST", "Test Stock", "Technology", new BigDecimal("1000.00"));
-        Random sharedRandom = new Random(42);
 
         int threads = 10;
         ExecutorService executor = Executors.newFixedThreadPool(threads);
@@ -148,10 +147,12 @@ public class SahamHistoryTest {
         }
 
         // Writer threads - continuously update price (which adds to history)
+        // Use seeded Random for reproducibility
         for (int i = 0; i < threads / 2; i++) {
+            final int seed = 42 + i;
             executor.submit(() -> {
                 try {
-                    Random localRandom = new Random();
+                    Random localRandom = new Random(seed);
                     while (running.get()) {
                         saham.updateHarga(localRandom);
                         Thread.yield();
