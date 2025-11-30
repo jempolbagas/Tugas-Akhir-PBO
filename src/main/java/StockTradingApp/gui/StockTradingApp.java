@@ -29,14 +29,16 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 import main.java.StockTradingApp.model.*;
+import main.java.StockTradingApp.service.AuthService;
+import main.java.StockTradingApp.service.DataManager;
 import main.java.StockTradingApp.service.MarketService;
-import main.java.StockTradingApp.service.SistemAutentikasi;
 import main.java.StockTradingApp.service.TradingService;
+import main.java.StockTradingApp.service.UserRepository;
 
 public class StockTradingApp extends Application {
     private Stage primaryStage;
     private BorderPane rootLayout;
-    private SistemAutentikasi auth;
+    private AuthService auth;
     private MarketService marketService;
     private TradingService tradingService;
     private Akun akunAktif = null;
@@ -48,12 +50,14 @@ public class StockTradingApp extends Application {
         this.primaryStage.setTitle("NeoStock - Futuristic Trading Platform");
 
         try {
-            auth = new SistemAutentikasi();
+            DataManager dataManager = new DataManager();
+            UserRepository userRepository = new UserRepository(dataManager);
+            auth = new AuthService(userRepository);
             marketService = new MarketService();
             tradingService = new TradingService(marketService, auth);
 
             // Show notifications if any
-            List<String> notifications = auth.getNotifications();
+            List<String> notifications = auth.getSystemNotifications();
             if (!notifications.isEmpty()) {
                 showAlert("System Notification", String.join("\n", notifications), Alert.AlertType.INFORMATION);
             }
@@ -235,7 +239,7 @@ public class StockTradingApp extends Application {
                     return;
                 }
 
-                auth.buatAkun(username, password, fullName, email, deposit);
+                auth.createAccount(username, password, fullName, email, deposit);
                 showAlert("Quantum Success", "Account activated! Welcome to Neo-Stock.", Alert.AlertType.INFORMATION);
                 showMainMenu();
 

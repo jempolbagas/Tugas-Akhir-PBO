@@ -4,8 +4,10 @@ import main.java.StockTradingApp.gui.UIHelper;
 import main.java.StockTradingApp.model.*;
 import main.java.StockTradingApp.service.LaporanManager;
 import main.java.StockTradingApp.service.MarketService;
-import main.java.StockTradingApp.service.SistemAutentikasi;
+import main.java.StockTradingApp.service.AuthService;
+import main.java.StockTradingApp.service.DataManager;
 import main.java.StockTradingApp.service.TradingService;
+import main.java.StockTradingApp.service.UserRepository;
 
 import java.math.BigDecimal;
 import java.time.format.DateTimeFormatter;
@@ -15,18 +17,20 @@ import java.util.Scanner;
 
 public class SistemTradingSaham {
     private static Scanner scanner = new Scanner(System.in);
-    private static SistemAutentikasi auth;
+    private static AuthService auth;
     private static MarketService marketService;
     private static TradingService tradingService;
     private static Akun akunAktif = null;
 
     public static void main(String[] args) {
         try {
-            auth = new SistemAutentikasi();
+            DataManager dataManager = new DataManager();
+            UserRepository userRepository = new UserRepository(dataManager);
+            auth = new AuthService(userRepository);
             marketService = new MarketService();
             tradingService = new TradingService(marketService, auth);
 
-            List<String> notifications = auth.getNotifications();
+            List<String> notifications = auth.getSystemNotifications();
             if (!notifications.isEmpty()) {
                 for (String notification : notifications) {
                     UIHelper.showNotification(notification);
@@ -143,7 +147,7 @@ public class SistemTradingSaham {
                 return;
             }
 
-            auth.buatAkun(username, password, namaLengkap, email, depositAwal);
+            auth.createAccount(username, password, namaLengkap, email, depositAwal);
 
             System.out.println("\n╔════════════════════════════════════════════════════════════════════════════════╗");
             System.out.println("║                     ✓ AKUN BERHASIL DIBUAT!                                    ║");
