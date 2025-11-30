@@ -3,12 +3,12 @@ package main.java.StockTradingApp.model;
 import main.java.StockTradingApp.exception.SahamTidakDitemukanException;
 
 public class PasarSaham {
-    private java.util.HashMap<String, Saham> daftarSaham;
+    private java.util.concurrent.ConcurrentHashMap<String, Saham> daftarSaham;
     private java.util.Random random;
     private boolean pasarBuka;
     
     public PasarSaham() {
-        this.daftarSaham = new java.util.HashMap<>();
+        this.daftarSaham = new java.util.concurrent.ConcurrentHashMap<>();
         this.random = new java.util.Random();
         this.pasarBuka = true;
         initializeSaham();
