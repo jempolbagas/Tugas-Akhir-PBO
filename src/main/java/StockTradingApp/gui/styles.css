@@ -316,3 +316,102 @@
     -fx-text-fill: white;
     -fx-font-family: 'Segoe UI', sans-serif;
 }
+
+/* === Grafik Crypto dengan Animasi === */
+.crypto-chart {
+    -fx-background-color: rgba(26, 26, 46, 0.8);
+    -fx-border-color: #444477;
+    -fx-border-radius: 12;
+    -fx-background-radius: 12;
+    -fx-padding: 15;
+}
+
+.crypto-chart .chart-title {
+    -fx-text-fill: linear-gradient(to right, #00ff88, #00ccff);
+    -fx-font-family: 'Segoe UI', sans-serif;
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+}
+
+.crypto-chart .chart-legend {
+    -fx-background-color: transparent;
+    -fx-text-fill: #8888ff;
+    -fx-font-size: 12px;
+}
+
+.crypto-chart .chart-plot-background {
+    -fx-background-color: transparent;
+}
+
+.crypto-chart .chart-series-line {
+    -fx-stroke: linear-gradient(to right, #00ff88, #00ccff);
+    -fx-stroke-width: 2px;
+    -fx-opacity: 0; /* mulai transparan untuk efek fade-in */
+}
+
+.crypto-chart .chart-line-symbol {
+    -fx-background-color: linear-gradient(to right, #00ff88, #00ccff);
+    -fx-background-radius: 50%;
+    -fx-padding: 4;
+    -fx-opacity: 0;
+}
+
+.crypto-chart .chart-line-symbol:hover {
+    -fx-scale-x: 1.3;
+    -fx-scale-y: 1.3;
+    -fx-effect: dropshadow(gaussian, rgba(0, 255, 136, 0.5), 10, 0.5, 0, 0);
+}
+
+.crypto-chart .chart-vertical-grid-lines,
+.crypto-chart .chart-horizontal-grid-lines {
+    -fx-stroke: rgba(136, 136, 255, 0.2);
+}
+
+/* === Quantum Menu Tabs === */
+.quantum-tab {
+    -fx-background-color: rgba(26, 26, 46, 0.6);
+    -fx-border-color: #444477;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+    -fx-padding: 15;
+}
+
+.quantum-tab .tab-title {
+    -fx-font-family: 'Segoe UI', sans-serif;
+    -fx-font-size: 20px;
+    -fx-font-weight: bold;
+    -fx-text-fill: linear-gradient(to right, #00ff88, #00ccff);
+    -fx-effect: dropshadow(gaussian, rgba(0, 255, 136, 0.3), 10, 0.5, 0, 0);
+}
+
+.quantum-tab .tab-content {
+    -fx-font-family: 'Segoe UI', sans-serif;
+    -fx-font-size: 14px;
+    -fx-text-fill: #8888ff;
+}
+
+/* === Empty State Styling === */
+.empty-state-message {
+    -fx-font-family: 'Segoe UI', sans-serif;
+    -fx-font-size: 16px;
+    -fx-text-fill: #6666cc;
+    -fx-text-alignment: center;
+    -fx-padding: 40;
+}
+
+/* === Logout Button === */
+.logout-button {
+    -fx-background-color: linear-gradient(to right, #ff4444, #ff6666);
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-background-radius: 8;
+    -fx-border-radius: 8;
+    -fx-padding: 8 16;
+    -fx-cursor: hand;
+}
+
+.logout-button:hover {
+    -fx-scale-x: 1.05;
+    -fx-scale-y: 1.05;
+    -fx-effect: dropshadow(gaussian, rgba(255, 68, 68, 0.5), 10, 0.5, 0, 0);
+}
