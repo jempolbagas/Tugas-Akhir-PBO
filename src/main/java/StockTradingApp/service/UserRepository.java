@@ -8,32 +8,34 @@ import main.java.StockTradingApp.model.Akun;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class UserRepository {
     private final DataManager dataManager;
-    private HashMap<String, Akun> database;
+    private Map<String, Akun> database;
     private final List<String> notifications;
 
     public UserRepository(DataManager dataManager) throws DatabaseLoadException, DatabaseSaveException {
         this.dataManager = dataManager;
-        this.notifications = new ArrayList<>();
+        this.notifications = Collections.synchronizedList(new ArrayList<>());
         initializeData();
     }
 
     private void initializeData() throws DatabaseLoadException, DatabaseSaveException {
         try {
-            this.database = dataManager.loadData();
+            this.database = new ConcurrentHashMap<>(dataManager.loadData());
         } catch (java.io.FileNotFoundException e) {
             notifications.add("File data tidak ditemukan. Membuat file baru.");
-            this.database = new HashMap<>();
+            this.database = new ConcurrentHashMap<>();
             saveData();
         } catch (JsonSyntaxException e) {
             notifications.add("File data rusak. Membuat backup dan memulai dengan data baru.");
             backupCorruptedData();
-            this.database = new HashMap<>();
+            this.database = new ConcurrentHashMap<>();
             saveData();
         } catch (IOException e) {
             throw new DatabaseLoadException("Gagal memuat data karena kesalahan I/O.", e);
