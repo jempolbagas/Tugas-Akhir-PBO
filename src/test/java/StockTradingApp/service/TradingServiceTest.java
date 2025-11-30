@@ -5,7 +5,7 @@ import main.java.StockTradingApp.model.Akun;
 import main.java.StockTradingApp.model.Saham;
 import main.java.StockTradingApp.model.TradeResult;
 import main.java.StockTradingApp.service.MarketService;
-import main.java.StockTradingApp.service.SistemAutentikasi;
+import main.java.StockTradingApp.service.AuthService;
 import main.java.StockTradingApp.service.TradingService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -16,7 +16,7 @@ import static org.mockito.Mockito.*;
 public class TradingServiceTest {
 
     private MarketService mockMarketService;
-    private SistemAutentikasi mockAuth;
+    private AuthService mockAuth;
     private TradingService tradingService;
     private Akun testAkun;
     private Saham testSaham;
@@ -24,7 +24,7 @@ public class TradingServiceTest {
     @BeforeEach
     public void setUp() {
         mockMarketService = mock(MarketService.class);
-        mockAuth = mock(SistemAutentikasi.class);
+        mockAuth = mock(AuthService.class);
         tradingService = new TradingService(mockMarketService, mockAuth);
 
         // Initial balance: 10,000.00

@@ -13,9 +13,9 @@ import java.math.BigDecimal;
 
 public class TradingService {
     private final MarketService marketService;
-    private final SistemAutentikasi auth;
+    private final AuthService auth;
 
-    public TradingService(MarketService marketService, SistemAutentikasi auth) {
+    public TradingService(MarketService marketService, AuthService auth) {
         this.marketService = marketService;
         this.auth = auth;
     }
