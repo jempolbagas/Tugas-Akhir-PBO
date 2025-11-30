@@ -15,6 +15,7 @@ import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.time.LocalDateTime;
 import java.util.HashMap;
+import java.util.Map;
 
 public class DataManager {
     private static final String DATA_DIR = "data";
@@ -43,7 +44,7 @@ public class DataManager {
         return FILE_PATH;
     }
 
-    public void saveData(HashMap<String, Akun> data) throws IOException {
+    public void saveData(Map<String, Akun> data) throws IOException {
         File tempFile = new File(TEMP_FILE_PATH);
         File finalFile = new File(FILE_PATH);
         try (FileWriter writer = new FileWriter(tempFile)) {

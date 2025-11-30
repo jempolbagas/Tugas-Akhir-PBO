@@ -2,6 +2,9 @@ package main.java.StockTradingApp.service;
 
 import main.java.StockTradingApp.exception.AkunTidakDitemukanException;
 import main.java.StockTradingApp.exception.DatabaseSaveException;
+import main.java.StockTradingApp.exception.DuplicateUsernameException;
+import main.java.StockTradingApp.exception.InvalidPasswordException;
+import main.java.StockTradingApp.exception.InvalidUsernameException;
 import main.java.StockTradingApp.exception.PasswordSalahException;
 import main.java.StockTradingApp.model.Akun;
 
@@ -20,17 +23,18 @@ public class AuthService {
     }
 
     public void createAccount(String username, String password, String namaLengkap,
-                              String email, BigDecimal saldoAwal) throws Exception {
-        if (userRepository.existsByUsername(username)) {
-            throw new Exception("Username sudah digunakan!");
-        }
-
+                              String email, BigDecimal saldoAwal)
+            throws InvalidUsernameException, InvalidPasswordException, DuplicateUsernameException, DatabaseSaveException {
         if (username.length() < 4) {
-            throw new Exception("Username minimal 4 karakter!");
+            throw new InvalidUsernameException("Username minimal 4 karakter!");
         }
 
         if (password.length() < 6) {
-            throw new Exception("Password minimal 6 karakter!");
+            throw new InvalidPasswordException("Password minimal 6 karakter!");
+        }
+
+        if (userRepository.existsByUsername(username)) {
+            throw new DuplicateUsernameException("Username sudah digunakan!");
         }
 
         Akun newAccount = new Akun(username, password, namaLengkap, email, saldoAwal);
