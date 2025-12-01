@@ -425,6 +425,10 @@
     -fx-text-fill: #ff4444;
 }
 
+.text-cyan {
+    -fx-text-fill: #00ccff;
+}
+
 /* Table Enhancements */
 .futuristic-table .corner {
     -fx-background-color: #1a1a2e;
