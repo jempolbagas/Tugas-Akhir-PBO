@@ -160,11 +160,11 @@ public class HistoryView {
             @Override
             protected void updateItem(BigDecimal item, boolean empty) {
                 super.updateItem(item, empty);
+                setAlignment(Pos.CENTER_RIGHT);
                 if (empty || item == null) {
                     setText(null);
                 } else {
                     setText(String.format("Rp %,.2f", item));
-                    setAlignment(Pos.CENTER_RIGHT);
                 }
             }
         });
@@ -178,21 +178,23 @@ public class HistoryView {
             protected void updateItem(BigDecimal item, boolean empty) {
                 super.updateItem(item, empty);
                 getStyleClass().removeAll("table-cell-positive", "table-cell-negative");
+                setAlignment(Pos.CENTER_RIGHT);
 
                 if (empty || item == null) {
                     setText(null);
                 } else {
                     setText(String.format("Rp %,.2f", item));
-                    setAlignment(Pos.CENTER_RIGHT);
 
-                    // Access the row data to check type
-                    Transaksi trx = getTableView().getItems().get(getIndex());
-                    String type = trx.getJenis();
+                    // Access the row data to check type safely
+                    Transaksi trx = getTableRow().getItem();
+                    if (trx != null) {
+                        String type = trx.getJenis();
 
-                    if ("SELL".equalsIgnoreCase(type) || "TOPUP".equalsIgnoreCase(type)) {
-                        getStyleClass().add("table-cell-positive"); // Cash In
-                    } else if ("BUY".equalsIgnoreCase(type)) {
-                        getStyleClass().add("table-cell-negative"); // Cash Out
+                        if ("SELL".equalsIgnoreCase(type) || "TOPUP".equalsIgnoreCase(type)) {
+                            getStyleClass().add("table-cell-positive"); // Cash In
+                        } else if ("BUY".equalsIgnoreCase(type)) {
+                            getStyleClass().add("table-cell-negative"); // Cash Out
+                        }
                     }
                 }
             }
@@ -263,8 +265,10 @@ public class HistoryView {
                 return true;
             }
             String lowerCaseFilter = searchText.toLowerCase();
-            return trx.getIdTransaksi().toLowerCase().contains(lowerCaseFilter) ||
-                   trx.getKodeSaham().toLowerCase().contains(lowerCaseFilter);
+            String id = trx.getIdTransaksi();
+            String kode = trx.getKodeSaham();
+            return (id != null && id.toLowerCase().contains(lowerCaseFilter)) ||
+                   (kode != null && kode.toLowerCase().contains(lowerCaseFilter));
         });
     }
 
