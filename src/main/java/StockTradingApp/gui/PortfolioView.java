@@ -12,6 +12,7 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
+import main.java.StockTradingApp.exception.SahamTidakDitemukanException;
 import main.java.StockTradingApp.model.Akun;
 import main.java.StockTradingApp.model.Portfolio;
 import main.java.StockTradingApp.model.Saham;
@@ -34,7 +35,7 @@ public class PortfolioView {
         try {
             Saham s = marketService.getSaham(kode);
             return s.getHargaSekarang();
-        } catch (Exception e) {
+        } catch (SahamTidakDitemukanException e) {
             return BigDecimal.ZERO;
         }
     }
@@ -68,18 +69,7 @@ public class PortfolioView {
         // 1. Symbol Column
         TableColumn<Portfolio, String> colSymbol = new TableColumn<>("Symbol");
         colSymbol.setCellValueFactory(new PropertyValueFactory<>("kodeSaham"));
-        colSymbol.setCellFactory(col -> new TableCell<Portfolio, String>() {
-            @Override
-            protected void updateItem(String item, boolean empty) {
-                super.updateItem(item, empty);
-                if (empty || item == null) {
-                    setText(null);
-                } else {
-                    setText(item);
-                    setAlignment(Pos.CENTER_LEFT);
-                }
-            }
-        });
+        colSymbol.setStyle("-fx-alignment: CENTER-LEFT;");
 
         // 2. Quantity Column
         TableColumn<Portfolio, Integer> colQty = new TableColumn<>("Quantity");
@@ -145,9 +135,12 @@ public class PortfolioView {
                 super.updateItem(item, empty);
                 if (empty || item == null) {
                     setText(null);
+                    getStyleClass().removeAll("text-cyan");
+                    setStyle("");
                 } else {
                     setText(String.format("Rp %,.2f", item));
-                    setStyle("-fx-text-fill: #00ccff;"); // Cyan for value
+                    getStyleClass().removeAll("text-cyan");
+                    getStyleClass().add("text-cyan");
                     setAlignment(Pos.CENTER_RIGHT);
                 }
             }
@@ -171,18 +164,7 @@ public class PortfolioView {
                     setStyle("");
                 } else {
                     setText(String.format("%sRp %,.2f", item.compareTo(BigDecimal.ZERO) >= 0 ? "+" : "", item));
-
-                    getStyleClass().removeAll("text-positive", "text-negative");
-
-                    if (item.compareTo(BigDecimal.ZERO) > 0) {
-                        getStyleClass().add("text-positive");
-                        setStyle(""); // Clear potential inline style
-                    } else if (item.compareTo(BigDecimal.ZERO) < 0) {
-                        getStyleClass().add("text-negative");
-                        setStyle(""); // Clear potential inline style
-                    } else {
-                        setStyle("-fx-text-fill: white;");
-                    }
+                    applyProfitLossFormatting(this, item);
                     setAlignment(Pos.CENTER_RIGHT);
                 }
             }
@@ -196,7 +178,7 @@ public class PortfolioView {
             try {
                 return new SimpleObjectProperty<>(p.hitungPersentaseKeuntungan(currentPrice));
             } catch (IllegalStateException e) {
-                // Return zero if total modal is zero to prevent crash
+                // Defensive handling for edge case where total modal is zero (should not normally occur)
                 return new SimpleObjectProperty<>(BigDecimal.ZERO);
             }
         });
@@ -206,22 +188,12 @@ public class PortfolioView {
                 super.updateItem(item, empty);
                 if (empty || item == null) {
                     setText(null);
+                    setGraphic(null);
                     getStyleClass().removeAll("text-positive", "text-negative");
                     setStyle("");
                 } else {
                     setText(String.format("%s%.2f%%", item.compareTo(BigDecimal.ZERO) >= 0 ? "+" : "", item));
-
-                    getStyleClass().removeAll("text-positive", "text-negative");
-
-                    if (item.compareTo(BigDecimal.ZERO) > 0) {
-                        getStyleClass().add("text-positive");
-                        setStyle("");
-                    } else if (item.compareTo(BigDecimal.ZERO) < 0) {
-                        getStyleClass().add("text-negative");
-                        setStyle("");
-                    } else {
-                        setStyle("-fx-text-fill: white;");
-                    }
+                    applyProfitLossFormatting(this, item);
                     setAlignment(Pos.CENTER_RIGHT);
                 }
             }
@@ -230,20 +202,38 @@ public class PortfolioView {
         table.getColumns().addAll(colSymbol, colQty, colAvgPrice, colCurPrice, colTotalValue, colPLValue, colPLPercent);
 
         // Populate Data
-        if (account != null && account.getPortfolio() != null) {
-            table.getItems().addAll(account.getPortfolio().values());
+        table.getItems().addAll(account.getPortfolio().values());
+
+        // Remove existing listener if present to prevent memory leaks
+        if (marketListener != null) {
+            marketService.removeListener(marketListener);
         }
 
         // Register Real-time Listener
         marketListener = () -> {
             Platform.runLater(() -> {
-                table.refresh(); // Triggers CellValueFactory re-evaluation for calculated columns
+                if (table != null && table.getScene() != null) {
+                    table.refresh();
+                }
             });
         };
         marketService.addListener(marketListener);
 
         content.getChildren().addAll(title, table);
         return content;
+    }
+
+    private void applyProfitLossFormatting(TableCell<Portfolio, BigDecimal> cell, BigDecimal value) {
+        cell.getStyleClass().removeAll("text-positive", "text-negative");
+        if (value.compareTo(BigDecimal.ZERO) > 0) {
+            cell.getStyleClass().add("text-positive");
+            cell.setStyle("");
+        } else if (value.compareTo(BigDecimal.ZERO) < 0) {
+            cell.getStyleClass().add("text-negative");
+            cell.setStyle("");
+        } else {
+            cell.setStyle("-fx-text-fill: white;");
+        }
     }
 
     public void dispose() {
