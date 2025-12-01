@@ -463,6 +463,8 @@
     -fx-border-width: 1; /* Full border for selected item */
     -fx-border-radius: 4;
     -fx-background-radius: 4;
+}
+
 /* Trade View Styles */
 .trade-view-title {
     -fx-font-family: 'Segoe UI';
@@ -511,4 +513,36 @@
     -fx-background-color: rgba(68, 68, 119, 0.3);
     -fx-border-color: #00ccff;
     -fx-text-fill: #00ccff;
+}
+
+/* Glassmorphism Cards */
+.glass-card {
+    -fx-background-color: rgba(26, 26, 46, 0.6);
+    -fx-border-color: rgba(255, 255, 255, 0.15);
+    -fx-border-width: 1;
+    -fx-border-radius: 12;
+    -fx-background-radius: 12;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.3), 10, 0.5, 0, 0);
+    -fx-padding: 15;
+    -fx-min-width: 200;
+}
+
+.glass-card:hover {
+    -fx-background-color: rgba(36, 36, 56, 0.7);
+    -fx-border-color: #00ccff;
+    -fx-effect: dropshadow(gaussian, rgba(0, 204, 255, 0.2), 15, 0.5, 0, 0);
+}
+
+.glass-card-title {
+    -fx-font-family: 'Segoe UI', sans-serif;
+    -fx-font-size: 14px;
+    -fx-text-fill: #8888ff;
+    -fx-font-weight: bold;
+}
+
+.glass-card-value {
+    -fx-font-family: 'Segoe UI', sans-serif;
+    -fx-font-size: 24px;
+    -fx-font-weight: bold;
+    -fx-text-fill: white;
 }

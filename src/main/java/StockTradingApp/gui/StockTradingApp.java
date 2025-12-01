@@ -5,6 +5,7 @@ import java.util.List;
 
 import javafx.animation.FadeTransition;
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -39,7 +40,12 @@ public class StockTradingApp extends Application {
     private MarketService marketService;
     private TradingService tradingService;
     private Akun akunAktif = null;
-    private Label balanceLabel;
+
+    // New Dashboard fields
+    private Label lblPortfolioValue;
+    private Label lblCashBalance;
+    private Label lblMarketStatus;
+    private Runnable dashboardListener;
 
     // Track the active views to handle cleanup
     private MarketView activeMarketView;
@@ -278,13 +284,85 @@ public class StockTradingApp extends Application {
 
         // Top header
         HBox header = createHeader();
-        dashboard.setTop(header);
+
+        // Dashboard Summary
+        HBox dashboardSummary = createDashboardHeader(akunAktif);
+
+        VBox topContainer = new VBox();
+        topContainer.getChildren().addAll(header, dashboardSummary);
+        dashboard.setTop(topContainer);
 
         // Center content - Stock market data
         TabPane contentTabs = createContentTabs();
         dashboard.setCenter(contentTabs);
 
         rootLayout.setCenter(dashboard);
+    }
+
+    private HBox createDashboardHeader(Akun akun) {
+        HBox dashboardHeader = new HBox(20);
+        dashboardHeader.setPadding(new Insets(20));
+        dashboardHeader.setAlignment(Pos.CENTER);
+        dashboardHeader.setStyle("-fx-background-color: transparent;");
+
+        // Card 1: Portfolio Value
+        lblPortfolioValue = new Label("Rp 0.00");
+        lblPortfolioValue.getStyleClass().add("glass-card-value");
+        VBox cardPortfolio = createCard("PORTFOLIO VALUE", lblPortfolioValue);
+
+        // Card 2: Cash Balance
+        lblCashBalance = new Label("Rp " + String.format("%,.2f", akun.getSaldo()));
+        lblCashBalance.getStyleClass().add("glass-card-value");
+        VBox cardCash = createCard("CASH BALANCE", lblCashBalance);
+
+        // Card 3: Market Status
+        lblMarketStatus = new Label("UNKNOWN");
+        lblMarketStatus.getStyleClass().add("glass-card-value");
+        VBox cardMarket = createCard("MARKET STATUS", lblMarketStatus);
+
+        dashboardHeader.getChildren().addAll(cardPortfolio, cardCash, cardMarket);
+
+        // Setup Listener
+        cleanupDashboard(); // Ensure old listener is removed
+
+        dashboardListener = () -> {
+            Platform.runLater(() -> {
+                // Update Portfolio Value
+                BigDecimal totalValue = akun.getSaldo();
+                try {
+                    for (Portfolio p : akun.getPortfolio().values()) {
+                         Saham s = marketService.getSaham(p.getKodeSaham());
+                         totalValue = totalValue.add(p.hitungNilaiSekarang(s.getHargaSekarang()));
+                    }
+                } catch (Exception e) {
+                    System.out.println("Error calculating portfolio: " + e.getMessage());
+                }
+                lblPortfolioValue.setText("Rp " + String.format("%,.2f", totalValue));
+
+                // Update Market Status
+                boolean isOpen = marketService.isPasarBuka();
+                lblMarketStatus.setText(isOpen ? "OPEN" : "CLOSED");
+                lblMarketStatus.setStyle(isOpen ? "-fx-text-fill: #00ff88;" : "-fx-text-fill: #ff4444;");
+            });
+        };
+
+        marketService.addListener(dashboardListener);
+
+        // Initial Update
+        dashboardListener.run();
+
+        return dashboardHeader;
+    }
+
+    private VBox createCard(String title, Label valueLabel) {
+        VBox card = new VBox(10);
+        card.getStyleClass().add("glass-card");
+
+        Label lblTitle = new Label(title);
+        lblTitle.getStyleClass().add("glass-card-title");
+
+        card.getChildren().addAll(lblTitle, valueLabel);
+        return card;
     }
 
     private HBox createHeader() {
@@ -294,16 +372,6 @@ public class StockTradingApp extends Application {
 
         Label welcomeLabel = new Label("QUANTUM OPERATOR: " + (akunAktif != null ? akunAktif.getNamaLengkap().toUpperCase() : "GUEST"));
         welcomeLabel.setStyle("-fx-font-family: 'Segoe UI'; -fx-text-fill: #00ff88; -fx-font-size: 14px; -fx-font-weight: bold;");
-
-        balanceLabel = new Label("QUANTUM FUEL: Rp " + (akunAktif != null ? String.format("%,.2f", akunAktif.getSaldo()) : "0"));
-        balanceLabel.setStyle("-fx-font-family: 'Segoe UI'; -fx-text-fill: #00ccff; -fx-font-size: 14px; -fx-font-weight: bold;");
-
-        boolean isOpen = (marketService != null) && marketService.isPasarBuka();
-
-        Label marketStatus = new Label(isOpen ? "🟢 MARKET: QUANTUM ACTIVE" : "🔴 MARKET: QUANTUM OFFLINE");
-        marketStatus.setStyle(isOpen ?
-                "-fx-font-family: 'Segoe UI'; -fx-text-fill: #00ff88; -fx-font-size: 12px; -fx-font-weight: bold;" :
-                "-fx-font-family: 'Segoe UI'; -fx-text-fill: #ff4444; -fx-font-size: 12px; -fx-font-weight: bold;");
 
         Button btnLogout = GUIUtils.createMenuButton("⏻ LOGOUT", "danger");
         btnLogout.setOnAction(e -> {
@@ -315,11 +383,11 @@ public class StockTradingApp extends Application {
 
         HBox.setHgrow(welcomeLabel, Priority.ALWAYS);
         if (akunAktif != null) {
-            header.getChildren().addAll(welcomeLabel, balanceLabel, marketStatus, btnLogout);
+            header.getChildren().addAll(welcomeLabel, btnLogout);
         } else {
             Button btnLogin = GUIUtils.createMenuButton("🔐 LOGIN", "primary");
             btnLogin.setOnAction(e -> showLoginForm());
-            header.getChildren().addAll(welcomeLabel, balanceLabel, marketStatus, btnLogin);
+            header.getChildren().addAll(welcomeLabel, btnLogin);
         }
         return header;
     }
@@ -346,8 +414,12 @@ public class StockTradingApp extends Application {
         // Create new TradeView
         activeTradeView = new TradeView(akunAktif, marketService, tradingService, () -> {
             // Callback when trade is successful
-            if (balanceLabel != null && akunAktif != null) {
-                balanceLabel.setText("QUANTUM FUEL: Rp " + String.format("%,.2f", akunAktif.getSaldo()));
+            if (lblCashBalance != null && akunAktif != null) {
+                lblCashBalance.setText("Rp " + String.format("%,.2f", akunAktif.getSaldo()));
+            }
+            // Trigger portfolio update as well
+            if (dashboardListener != null) {
+                dashboardListener.run();
             }
             refreshDashboard();
         });
@@ -366,6 +438,7 @@ public class StockTradingApp extends Application {
     }
 
     private void disposeActiveViews() {
+        cleanupDashboard();
         if (activeMarketView != null) {
             activeMarketView.dispose();
             activeMarketView = null;
@@ -381,6 +454,13 @@ public class StockTradingApp extends Application {
         if (activeHistoryView != null) {
             activeHistoryView.dispose();
             activeHistoryView = null;
+        }
+    }
+
+    private void cleanupDashboard() {
+        if (dashboardListener != null && marketService != null) {
+            marketService.removeListener(dashboardListener);
+            dashboardListener = null;
         }
     }
 
