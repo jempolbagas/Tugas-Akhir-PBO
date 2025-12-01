@@ -22,6 +22,10 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * View class responsible for handling stock trades (Buy/Sell).
+ * Provides a user interface for selecting stocks, specifying quantity, and executing orders.
+ */
 public class TradeView {
     private final Akun account;
     private final MarketService marketService;
@@ -41,6 +45,14 @@ public class TradeView {
         }
     }
 
+    /**
+     * Constructs a new TradeView.
+     *
+     * @param account        The user account.
+     * @param marketService  The market service.
+     * @param tradingService The trading service.
+     * @param onTradeSuccess A callback to execute after a successful trade.
+     */
     public TradeView(Akun account, MarketService marketService, TradingService tradingService, Runnable onTradeSuccess) {
         this.account = account;
         this.marketService = marketService;
@@ -48,6 +60,12 @@ public class TradeView {
         this.onTradeSuccess = onTradeSuccess;
     }
 
+    /**
+     * Builds and returns the trade UI view.
+     * Contains separate sections for Buying and Selling.
+     *
+     * @return A Node containing the trade interface.
+     */
     public Node getView() {
         VBox content = new VBox(20);
         content.setPadding(new Insets(20));
@@ -69,6 +87,13 @@ public class TradeView {
         return content;
     }
 
+    /**
+     * Creates a trade section (Buy or Sell) with all necessary controls.
+     *
+     * @param type  The type of trade ("BUY" or "SELL").
+     * @param emoji An emoji icon for the title.
+     * @return A VBox containing the trade form.
+     */
     private VBox createTradeSection(String type, String emoji) {
         VBox section = new VBox(15);
         section.setPadding(new Insets(20));
@@ -194,12 +219,27 @@ public class TradeView {
         return section;
     }
 
+    /**
+     * Creates a quick quantity selection button (e.g., 25%, 50%, MAX).
+     *
+     * @param text The button text.
+     * @return A styled Button.
+     */
     private Button createQuickQtyButton(String text) {
         Button btn = new Button(text);
         btn.getStyleClass().add("quick-qty-button");
         return btn;
     }
 
+    /**
+     * Calculates and sets the quantity field based on the selected percentage.
+     * Logic differs for Buy (based on balance) and Sell (based on ownership).
+     *
+     * @param percentage    The percentage (0.25, 0.50, 1.00).
+     * @param type          The trade type.
+     * @param stockCode     The selected stock.
+     * @param quantityField The text field to update.
+     */
     private void applyQuickQuantity(double percentage, String type, String stockCode, TextField quantityField) {
         if (stockCode == null || account == null) return;
 
@@ -233,6 +273,13 @@ public class TradeView {
         }
     }
 
+    /**
+     * Updates the total price label based on quantity and current stock price.
+     *
+     * @param quantityField The quantity input field.
+     * @param saham         The selected stock.
+     * @param totalLabel    The label to update.
+     */
     private void updateTotalLabel(TextField quantityField, Saham saham, Label totalLabel) {
         try {
             int lot = Integer.parseInt(quantityField.getText());
@@ -244,6 +291,9 @@ public class TradeView {
         }
     }
 
+    /**
+     * Cleans up resources by removing listeners attached to UI controls.
+     */
     public void dispose() {
         // Remove all registered listeners
         for (ListenerBinding binding : listenerBindings) {

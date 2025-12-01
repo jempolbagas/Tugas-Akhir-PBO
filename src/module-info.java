@@ -1,3 +1,8 @@
+/**
+ * The module definition for the StockTradingApp.
+ * Requires JavaFX modules and Gson for JSON processing.
+ * Exports packages for external use and opens them for reflection-based access (JavaFX, Gson, JUnit).
+ */
 module main.java.StockTradingApp {
     requires javafx.controls;
     requires javafx.fxml;

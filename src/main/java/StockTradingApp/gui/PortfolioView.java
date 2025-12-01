@@ -20,17 +20,34 @@ import main.java.StockTradingApp.service.MarketService;
 
 import java.math.BigDecimal;
 
+/**
+ * View class responsible for displaying the user's stock portfolio.
+ * Shows a table of owned stocks including quantity, average price, current market value, and profit/loss.
+ */
 public class PortfolioView {
     private final Akun account;
     private final MarketService marketService;
     private Runnable marketListener;
     private TableView<Portfolio> table;
 
+    /**
+     * Constructs a new PortfolioView.
+     *
+     * @param account       The user account.
+     * @param marketService The market service to get current stock prices.
+     */
     public PortfolioView(Akun account, MarketService marketService) {
         this.account = account;
         this.marketService = marketService;
     }
 
+    /**
+     * Safely retrieves the current price of a stock.
+     * Returns ZERO if the stock is not found.
+     *
+     * @param kode The stock code.
+     * @return The current price.
+     */
     private BigDecimal getHargaSekarangSafe(String kode) {
         try {
             Saham s = marketService.getSaham(kode);
@@ -40,6 +57,11 @@ public class PortfolioView {
         }
     }
 
+    /**
+     * Builds and returns the portfolio UI view.
+     *
+     * @return A Node containing the portfolio table.
+     */
     public Node getView() {
         VBox content = new VBox(15);
         content.setPadding(new Insets(20));
@@ -223,6 +245,13 @@ public class PortfolioView {
         return content;
     }
 
+    /**
+     * Applies styling to a table cell based on the profit/loss value.
+     * Green for profit, red for loss.
+     *
+     * @param cell  The cell to style.
+     * @param value The profit/loss value.
+     */
     private void applyProfitLossFormatting(TableCell<Portfolio, BigDecimal> cell, BigDecimal value) {
         cell.getStyleClass().removeAll("text-positive", "text-negative");
         if (value.compareTo(BigDecimal.ZERO) > 0) {
@@ -236,6 +265,9 @@ public class PortfolioView {
         }
     }
 
+    /**
+     * Cleans up resources (removes market listener) when the view is closed.
+     */
     public void dispose() {
         if (marketListener != null) {
             marketService.removeListener(marketListener);
