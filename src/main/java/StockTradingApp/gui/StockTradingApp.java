@@ -41,8 +41,11 @@ public class StockTradingApp extends Application {
     private Akun akunAktif = null;
     private Label balanceLabel;
 
-    // Track the active MarketView to handle cleanup
+    // Track the active views to handle cleanup
     private MarketView activeMarketView;
+    private PortfolioView activePortfolioView;
+    private TradeView activeTradeView;
+    private HistoryView activeHistoryView;
 
     @Override
     public void start(Stage primaryStage) {
@@ -305,11 +308,8 @@ public class StockTradingApp extends Application {
         Button btnLogout = GUIUtils.createMenuButton("⏻ LOGOUT", "danger");
         btnLogout.setOnAction(e -> {
             akunAktif = null;
-            // Clean up market view if it exists
-            if (activeMarketView != null) {
-                activeMarketView.dispose();
-                activeMarketView = null;
-            }
+            // Clean up all views
+            disposeActiveViews();
             showMainMenu();
         });
 
@@ -328,10 +328,8 @@ public class StockTradingApp extends Application {
         TabPane tabPane = new TabPane();
         tabPane.setStyle("-fx-background-color: transparent; -fx-border-color: transparent;");
 
-        // Dispose previous MarketView to ensure listeners are removed
-        if (activeMarketView != null) {
-            activeMarketView.dispose();
-        }
+        // Dispose previous views to ensure listeners are removed
+        disposeActiveViews();
 
         // Create new MarketView
         activeMarketView = new MarketView(marketService);
@@ -339,26 +337,51 @@ public class StockTradingApp extends Application {
         tabStocks.setContent(activeMarketView.getView());
         tabStocks.setClosable(false);
 
+        // Create new PortfolioView
+        activePortfolioView = new PortfolioView(akunAktif, marketService);
         Tab tabPortfolio = new Tab("💼 QUANTUM PORTFOLIO");
-        tabPortfolio.setContent(new PortfolioView(akunAktif, marketService).getView());
+        tabPortfolio.setContent(activePortfolioView.getView());
         tabPortfolio.setClosable(false);
 
-        Tab tabTrade = new Tab("⚡ QUANTUM TRADE");
-        tabTrade.setContent(new TradeView(akunAktif, marketService, tradingService, () -> {
+        // Create new TradeView
+        activeTradeView = new TradeView(akunAktif, marketService, tradingService, () -> {
             // Callback when trade is successful
             if (balanceLabel != null && akunAktif != null) {
                 balanceLabel.setText("QUANTUM FUEL: Rp " + String.format("%,.2f", akunAktif.getSaldo()));
             }
             refreshDashboard();
-        }).getView());
+        });
+        Tab tabTrade = new Tab("⚡ QUANTUM TRADE");
+        tabTrade.setContent(activeTradeView.getView());
         tabTrade.setClosable(false);
 
+        // Create new HistoryView
+        activeHistoryView = new HistoryView(akunAktif);
         Tab tabHistory = new Tab("📊 QUANTUM HISTORY");
-        tabHistory.setContent(new HistoryView(akunAktif).getView());
+        tabHistory.setContent(activeHistoryView.getView());
         tabHistory.setClosable(false);
 
         tabPane.getTabs().addAll(tabStocks, tabPortfolio, tabTrade, tabHistory);
         return tabPane;
+    }
+
+    private void disposeActiveViews() {
+        if (activeMarketView != null) {
+            activeMarketView.dispose();
+            activeMarketView = null;
+        }
+        if (activePortfolioView != null) {
+            activePortfolioView.dispose();
+            activePortfolioView = null;
+        }
+        if (activeTradeView != null) {
+            activeTradeView.dispose();
+            activeTradeView = null;
+        }
+        if (activeHistoryView != null) {
+            activeHistoryView.dispose();
+            activeHistoryView = null;
+        }
     }
 
     private void refreshDashboard() {

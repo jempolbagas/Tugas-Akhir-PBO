@@ -44,4 +44,8 @@ public class HistoryView {
         content.getChildren().addAll(title, historyList);
         return new ScrollPane(content);
     }
+
+    public void dispose() {
+        // No listeners to clean up, but method provided for consistent lifecycle management
+    }
 }

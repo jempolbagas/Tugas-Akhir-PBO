@@ -21,12 +21,19 @@ import java.util.List;
 public class MarketView {
     private final MarketService marketService;
     private Runnable marketListener;
+    private boolean viewCreated = false;
+    private Node cachedView;
 
     public MarketView(MarketService marketService) {
         this.marketService = marketService;
     }
 
     public Node getView() {
+        // Guard to prevent multiple listener registrations if getView() is called multiple times
+        if (viewCreated) {
+            return cachedView;
+        }
+        viewCreated = true;
         SplitPane splitPane = new SplitPane();
         splitPane.setDividerPositions(0.3);
         splitPane.setStyle("-fx-background-color: transparent; -fx-padding: 20;");
@@ -109,6 +116,7 @@ public class MarketView {
         }
 
         splitPane.getItems().addAll(listContainer, chartContainer);
+        cachedView = splitPane;
         return splitPane;
     }
 

@@ -43,7 +43,6 @@ public class PortfolioView {
         for (Portfolio port : account.getPortfolio().values()) {
             try {
                 Saham saham = marketService.getSaham(port.getKodeSaham());
-                BigDecimal nilaiSkrg = port.hitungNilaiSekarang(saham.getHargaSekarang());
                 BigDecimal profit = port.hitungKeuntungan(saham.getHargaSekarang());
                 BigDecimal persentase = port.hitungPersentaseKeuntungan(saham.getHargaSekarang());
 
@@ -65,5 +64,9 @@ public class PortfolioView {
 
         content.getChildren().addAll(title, portfolioList);
         return new ScrollPane(content);
+    }
+
+    public void dispose() {
+        // No listeners to clean up, but method provided for consistent lifecycle management
     }
 }
