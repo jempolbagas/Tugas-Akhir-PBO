@@ -346,14 +346,14 @@
 .crypto-chart .chart-series-line {
     -fx-stroke: linear-gradient(to right, #00ff88, #00ccff);
     -fx-stroke-width: 2px;
-    -fx-opacity: 0; /* mulai transparan untuk efek fade-in */
+    -fx-opacity: 1; /* forced visible */
 }
 
 .crypto-chart .chart-line-symbol {
     -fx-background-color: linear-gradient(to right, #00ff88, #00ccff);
     -fx-background-radius: 50%;
     -fx-padding: 4;
-    -fx-opacity: 0;
+    -fx-opacity: 1;
 }
 
 .crypto-chart .chart-line-symbol:hover {
