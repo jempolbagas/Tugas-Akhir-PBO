@@ -20,16 +20,31 @@ import main.java.StockTradingApp.service.MarketService;
 import java.math.BigDecimal;
 import java.util.List;
 
+/**
+ * View class responsible for displaying the live market data.
+ * Shows a list of stocks with real-time prices and a line chart for the selected stock's price history.
+ */
 public class MarketView {
     private final MarketService marketService;
     private Runnable marketListener;
     private boolean viewCreated = false;
     private Node cachedView;
 
+    /**
+     * Constructs a new MarketView.
+     *
+     * @param marketService The market service to subscribe to for updates.
+     */
     public MarketView(MarketService marketService) {
         this.marketService = marketService;
     }
 
+    /**
+     * Builds and returns the market UI view.
+     * Contains a SplitPane with the stock list on the left and the price chart on the right.
+     *
+     * @return A Node containing the market interface.
+     */
     public Node getView() {
         // Guard to prevent multiple listener registrations if getView() is called multiple times
         if (viewCreated) {
@@ -162,6 +177,13 @@ public class MarketView {
         return splitPane;
     }
 
+    /**
+     * Updates the chart data for the selected stock.
+     *
+     * @param chart  The LineChart to update.
+     * @param series The data series to populate.
+     * @param saham  The selected stock.
+     */
     private void updateChartData(LineChart<String, Number> chart, XYChart.Series<String, Number> series, Saham saham) {
         chart.setTitle(saham.getNamaSaham() + " (" + saham.getKode() + ")");
         series.getData().clear();
@@ -174,6 +196,9 @@ public class MarketView {
         }
     }
 
+    /**
+     * Cleans up resources (removes market listener) when the view is closed.
+     */
     public void dispose() {
         if (marketListener != null) {
             marketService.removeListener(marketListener);

@@ -11,10 +11,20 @@ import main.java.StockTradingApp.model.TradeResult;
 
 import java.math.BigDecimal;
 
+/**
+ * Service class for executing trade transactions (Buy/Sell).
+ * Ensures transactions are atomic and handles data persistence.
+ */
 public class TradingService {
     private final MarketService marketService;
     private final AuthService auth;
 
+    /**
+     * Constructs a new TradingService.
+     *
+     * @param marketService The service to access market data.
+     * @param auth          The service to manage user data persistence.
+     */
     public TradingService(MarketService marketService, AuthService auth) {
         this.marketService = marketService;
         this.auth = auth;
@@ -132,6 +142,17 @@ public class TradingService {
         }
     }
 
+    /**
+     * Rolls back a buy transaction in case of persistence failure.
+     *
+     * @param akun                     The account.
+     * @param saham                    The stock involved.
+     * @param saldoSebelum             Balance before transaction.
+     * @param jumlahPortfolioSebelum   Portfolio quantity before transaction.
+     * @param hargaBeliSebelum         Average buy price before transaction.
+     * @param totalModalSebelum        Total invested capital before transaction.
+     * @param ukuranRiwayatSebelum     Size of transaction history before transaction.
+     */
     private void rollbackBeliSaham(Akun akun, Saham saham, BigDecimal saldoSebelum,
                                           int jumlahPortfolioSebelum, BigDecimal hargaBeliSebelum,
                                           BigDecimal totalModalSebelum, int ukuranRiwayatSebelum) {
@@ -158,6 +179,17 @@ public class TradingService {
         }
     }
 
+    /**
+     * Rolls back a sell transaction in case of persistence failure.
+     *
+     * @param akun                     The account.
+     * @param saham                    The stock involved.
+     * @param saldoSebelum             Balance before transaction.
+     * @param jumlahPortfolioSebelum   Portfolio quantity before transaction.
+     * @param hargaBeliSebelum         Average buy price before transaction.
+     * @param totalModalSebelum        Total invested capital before transaction.
+     * @param ukuranRiwayatSebelum     Size of transaction history before transaction.
+     */
     private void rollbackJualSaham(Akun akun, Saham saham, BigDecimal saldoSebelum,
                                           int jumlahPortfolioSebelum, BigDecimal hargaBeliSebelum,
                                           BigDecimal totalModalSebelum, int ukuranRiwayatSebelum) {

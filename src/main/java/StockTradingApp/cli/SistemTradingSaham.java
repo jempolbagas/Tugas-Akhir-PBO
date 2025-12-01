@@ -15,6 +15,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
+/**
+ * Command-line interface for the Stock Trading System.
+ * Provides a text-based menu for interacting with the application.
+ * Note: This is considered "Legacy" mode compared to the JavaFX GUI.
+ */
 public class SistemTradingSaham {
     private static Scanner scanner = new Scanner(System.in);
     private static AuthService auth;
@@ -22,6 +27,12 @@ public class SistemTradingSaham {
     private static TradingService tradingService;
     private static Akun akunAktif = null;
 
+    /**
+     * The main method for the CLI application.
+     * Initializes services, handles user interaction loops, and manages application shutdown.
+     *
+     * @param args Command line arguments.
+     */
     public static void main(String[] args) {
         try {
             DataManager dataManager = new DataManager();
@@ -68,6 +79,9 @@ public class SistemTradingSaham {
         System.exit(0); // Ensure threads are killed
     }
 
+    /**
+     * Displays the initial splash screen banner.
+     */
     private static void tampilkanSplashScreen() {
         UIHelper.clearScreen();
         System.out.println("\n");
@@ -82,6 +96,11 @@ public class SistemTradingSaham {
         if (scanner.hasNextLine()) scanner.nextLine();
     }
 
+    /**
+     * Displays the main menu for unauthenticated users.
+     *
+     * @return true to continue running, false to exit.
+     */
     private static boolean menuUtama() {
         UIHelper.clearScreen();
         UIHelper.tampilkanHeader("SISTEM TRADING SAHAM DIGITAL");
@@ -123,6 +142,9 @@ public class SistemTradingSaham {
         return true;
     }
 
+    /**
+     * Handles the account registration process via CLI.
+     */
     private static void buatAkunBaru() {
         UIHelper.tampilkanHeader("PENDAFTARAN AKUN BARU");
 
@@ -160,6 +182,9 @@ public class SistemTradingSaham {
         }
     }
 
+    /**
+     * Handles the login process via CLI.
+     */
     private static void login() {
         UIHelper.tampilkanHeader("LOGIN");
 
@@ -182,6 +207,9 @@ public class SistemTradingSaham {
         }
     }
 
+    /**
+     * Displays a live updating list of stock prices for guest users.
+     */
     private static void lihatHargaSahamGuest() {
         Runnable renderTask = () -> {
             UIHelper.clearScreen();
@@ -201,6 +229,11 @@ public class SistemTradingSaham {
         marketService.removeListener(renderTask);
     }
 
+    /**
+     * Displays the trading menu for authenticated users.
+     *
+     * @return true to continue running, false to logout/exit.
+     */
     private static boolean menuTrading() {
         UIHelper.clearScreen();
         UIHelper.tampilkanHeader("MENU TRADING - " + akunAktif.getNamaLengkap());
@@ -267,6 +300,9 @@ public class SistemTradingSaham {
         return true;
     }
 
+    /**
+     * Displays a live updating list of stock prices for authenticated users.
+     */
     private static void lihatDaftarSahamLive() {
         Runnable renderTask = () -> {
             UIHelper.clearScreen();
@@ -287,6 +323,9 @@ public class SistemTradingSaham {
         marketService.removeListener(renderTask);
     }
 
+    /**
+     * Helper method to print the stock table to the console.
+     */
     private static void tampilkanTabelSaham() {
         System.out.println("\n┌────────────────────────────────────────────────────────────────────────────────┐");
         System.out.printf("│ %-8s %-25s %-15s %-12s %-8s %-12s │\n",
@@ -305,6 +344,9 @@ public class SistemTradingSaham {
         System.out.println("└────────────────────────────────────────────────────────────────────────────────┘");
     }
 
+    /**
+     * Handles the stock purchase process via CLI.
+     */
     private static void beliSaham() {
         UIHelper.tampilkanHeader("BELI SAHAM");
 
@@ -378,6 +420,9 @@ public class SistemTradingSaham {
         }
     }
 
+    /**
+     * Handles the stock selling process via CLI.
+     */
     private static void jualSaham() {
         UIHelper.tampilkanHeader("JUAL SAHAM");
 
@@ -498,6 +543,9 @@ public class SistemTradingSaham {
         }
     }
 
+    /**
+     * Displays the user's current portfolio.
+     */
     private static void lihatPortfolio() {
         UIHelper.tampilkanHeader("PORTFOLIO SAHAM");
 
@@ -561,6 +609,9 @@ public class SistemTradingSaham {
         System.out.println("└────────────────────────────────────────────────────────────────────────────────┘");
     }
 
+    /**
+     * Displays the user's transaction history.
+     */
     private static void lihatRiwayatTransaksi() {
         UIHelper.tampilkanHeader("RIWAYAT TRANSAKSI");
 
@@ -588,6 +639,9 @@ public class SistemTradingSaham {
         }
     }
 
+    /**
+     * Handles the balance top-up process via CLI.
+     */
     private static void topUpSaldo() {
         UIHelper.tampilkanHeader("TOP UP SALDO");
 
@@ -627,6 +681,9 @@ public class SistemTradingSaham {
         }
     }
 
+    /**
+     * Exports the user's trading report to a file.
+     */
     private static void exportLaporan() {
         UIHelper.tampilkanHeader("EXPORT LAPORAN");
 
@@ -640,6 +697,9 @@ public class SistemTradingSaham {
         System.out.println("   • Statistik trading");
     }
 
+    /**
+     * Displays account settings and information.
+     */
     private static void pengaturanAkun() {
         UIHelper.tampilkanHeader("PENGATURAN AKUN");
 
@@ -658,6 +718,9 @@ public class SistemTradingSaham {
         System.out.println("└────────────────────────────────────────────────────────────────────────────────┘");
     }
 
+    /**
+     * Logs out the current user.
+     */
     private static void logout() {
         System.out.println("\n╔════════════════════════════════════════════════════════════════════════════════╗");
         System.out.println("║                     👋 LOGOUT BERHASIL                                        ║");
@@ -666,6 +729,11 @@ public class SistemTradingSaham {
         akunAktif = null;
     }
 
+    /**
+     * Rolls back a balance top-up in case of failure.
+     *
+     * @param saldoSebelum The balance before the attempted top-up.
+     */
     private static void rollbackTambahSaldo(BigDecimal saldoSebelum) {
         // Simply restore the saldo
         akunAktif.setSaldo(saldoSebelum);

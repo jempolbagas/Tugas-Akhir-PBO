@@ -12,7 +12,6 @@ import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
-import javafx.scene.control.ScrollPane;
 import javafx.scene.control.SplitPane;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
@@ -30,6 +29,10 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
+/**
+ * View class responsible for displaying the transaction history.
+ * Provides a tabular view of past transactions with filtering and detailed inspection capabilities.
+ */
 public class HistoryView {
     private final Akun account;
     private FilteredList<Transaksi> filteredData;
@@ -38,10 +41,21 @@ public class HistoryView {
     private Label detailSummary;
     private Label detailImpact;
 
+    /**
+     * Constructs a new HistoryView.
+     *
+     * @param account The user account to display history for.
+     */
     public HistoryView(Akun account) {
         this.account = account;
     }
 
+    /**
+     * Builds and returns the main UI node for the history view.
+     * Includes the search bar, filter options, transaction table, and detail panel.
+     *
+     * @return A Node representing the history view.
+     */
     public Node getView() {
         // Main Container is now a SplitPane
         SplitPane splitPane = new SplitPane();
@@ -256,6 +270,12 @@ public class HistoryView {
         return splitPane;
     }
 
+    /**
+     * Updates the data filter based on search text and transaction type.
+     *
+     * @param searchText The text to search for (ID or Ticker).
+     * @param type       The transaction type to filter by (e.g., "ALL", "BUY").
+     */
     private void updateFilter(String searchText, String type) {
         filteredData.setPredicate(trx -> {
             if (type != null && !"ALL".equals(type) && !type.equalsIgnoreCase(trx.getJenis())) {
@@ -272,6 +292,11 @@ public class HistoryView {
         });
     }
 
+    /**
+     * Displays details for a selected transaction in the detail panel.
+     *
+     * @param trx The transaction object to display.
+     */
     private void showDetails(Transaksi trx) {
         String type = trx.getJenis();
         String symbol = trx.getKodeSaham();
@@ -308,6 +333,9 @@ public class HistoryView {
         }
     }
 
+    /**
+     * Hides the transaction detail panel.
+     */
     private void hideDetails() {
         if (detailPanel.isVisible()) {
             FadeTransition ft = new FadeTransition(Duration.millis(300), detailPanel);
@@ -318,6 +346,10 @@ public class HistoryView {
         }
     }
 
+    /**
+     * Cleans up resources when the view is closed.
+     * (Currently no-op as there are no external listeners).
+     */
     public void dispose() {
         // No listeners to clean up
     }

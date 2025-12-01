@@ -12,7 +12,18 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 
+/**
+ * Utility class for generating trading reports.
+ * Exports account details, portfolio status, and transaction history to a text file.
+ */
 public class LaporanManager {
+    /**
+     * Exports a comprehensive trading report for a user to a text file.
+     * The file is named "Laporan_Trading_[username].txt".
+     *
+     * @param akun  The user account to generate the report for.
+     * @param pasar The stock market instance to retrieve current prices.
+     */
     public static void exportLaporan(Akun akun, PasarSaham pasar) {
         String filename = "Laporan_Trading_" + akun.getUsername() + ".txt";
         

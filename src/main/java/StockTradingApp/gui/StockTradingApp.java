@@ -33,6 +33,10 @@ import main.java.StockTradingApp.service.MarketService;
 import main.java.StockTradingApp.service.TradingService;
 import main.java.StockTradingApp.service.UserRepository;
 
+/**
+ * Main application class for the Stock Trading Platform (JavaFX).
+ * Handles the application lifecycle, scene navigation, and high-level UI orchestration.
+ */
 public class StockTradingApp extends Application {
     private Stage primaryStage;
     private BorderPane rootLayout;
@@ -53,6 +57,12 @@ public class StockTradingApp extends Application {
     private TradeView activeTradeView;
     private HistoryView activeHistoryView;
 
+    /**
+     * Entry point for the JavaFX application.
+     * Initializes services, sets up the main stage, and shows the splash screen.
+     *
+     * @param primaryStage The primary stage for this application.
+     */
     @Override
     public void start(Stage primaryStage) {
         this.primaryStage = primaryStage;
@@ -83,6 +93,9 @@ public class StockTradingApp extends Application {
         }
     }
 
+    /**
+     * Initializes the root layout container.
+     */
     private void initRootLayout() {
         rootLayout = new BorderPane();
         rootLayout.getStyleClass().add("root-layout");
@@ -98,6 +111,10 @@ public class StockTradingApp extends Application {
         primaryStage.show();
     }
 
+    /**
+     * Displays the initial splash screen with animation.
+     * Transitions to the main menu upon completion.
+     */
     private void showSplashScreen() {
         VBox splashContainer = new VBox(30);
         splashContainer.setAlignment(Pos.CENTER);
@@ -130,6 +147,9 @@ public class StockTradingApp extends Application {
         });
     }
 
+    /**
+     * Displays the main menu with navigation options (Register, Login, Guest, Exit).
+     */
     private void showMainMenu() {
         VBox mainMenu = new VBox(30);
         mainMenu.setAlignment(Pos.CENTER);
@@ -174,6 +194,9 @@ public class StockTradingApp extends Application {
         rootLayout.setCenter(mainMenu);
     }
 
+    /**
+     * Displays the user registration form.
+     */
     private void showRegistrationForm() {
         VBox formContainer = new VBox(20);
         formContainer.setAlignment(Pos.CENTER);
@@ -237,6 +260,9 @@ public class StockTradingApp extends Application {
         rootLayout.setCenter(formContainer);
     }
 
+    /**
+     * Displays the user login form.
+     */
     private void showLoginForm() {
         VBox formContainer = new VBox(20);
         formContainer.setAlignment(Pos.CENTER);
@@ -278,6 +304,10 @@ public class StockTradingApp extends Application {
         rootLayout.setCenter(formContainer);
     }
 
+    /**
+     * Displays the main trading dashboard for an authenticated user.
+     * Sets up the header, summary cards, and content tabs.
+     */
     private void showTradingDashboard() {
         BorderPane dashboard = new BorderPane();
         dashboard.setStyle("-fx-background-color: linear-gradient(to bottom right, #0a0a12, #151528);");
@@ -299,6 +329,12 @@ public class StockTradingApp extends Application {
         rootLayout.setCenter(dashboard);
     }
 
+    /**
+     * Creates the dashboard summary header containing Portfolio Value, Cash Balance, and Market Status.
+     *
+     * @param akun The authenticated account.
+     * @return An HBox containing the summary cards.
+     */
     private HBox createDashboardHeader(Akun akun) {
         HBox dashboardHeader = new HBox(20);
         dashboardHeader.setPadding(new Insets(20));
@@ -354,6 +390,13 @@ public class StockTradingApp extends Application {
         return dashboardHeader;
     }
 
+    /**
+     * Creates a styled summary card.
+     *
+     * @param title      The card title.
+     * @param valueLabel The label displaying the value.
+     * @return A VBox representing the card.
+     */
     private VBox createCard(String title, Label valueLabel) {
         VBox card = new VBox(10);
         card.getStyleClass().add("glass-card");
@@ -365,6 +408,11 @@ public class StockTradingApp extends Application {
         return card;
     }
 
+    /**
+     * Creates the top navigation header with user info and logout button.
+     *
+     * @return An HBox representing the header.
+     */
     private HBox createHeader() {
         HBox header = new HBox(20);
         header.setPadding(new Insets(15, 30, 15, 30));
@@ -392,6 +440,12 @@ public class StockTradingApp extends Application {
         return header;
     }
 
+    /**
+     * Creates the main content tab pane (Market, Portfolio, Trade, History).
+     * Initializes the respective View classes.
+     *
+     * @return A TabPane containing the application views.
+     */
     private TabPane createContentTabs() {
         TabPane tabPane = new TabPane();
         tabPane.setStyle("-fx-background-color: transparent; -fx-border-color: transparent;");
@@ -437,6 +491,9 @@ public class StockTradingApp extends Application {
         return tabPane;
     }
 
+    /**
+     * Disposes of active view instances to clean up resources (listeners).
+     */
     private void disposeActiveViews() {
         cleanupDashboard();
         if (activeMarketView != null) {
@@ -457,6 +514,9 @@ public class StockTradingApp extends Application {
         }
     }
 
+    /**
+     * Cleans up the dashboard-specific market listener.
+     */
     private void cleanupDashboard() {
         if (dashboardListener != null && marketService != null) {
             marketService.removeListener(dashboardListener);
@@ -464,12 +524,18 @@ public class StockTradingApp extends Application {
         }
     }
 
+    /**
+     * Refreshes the dashboard content (rebuilds tabs).
+     */
     private void refreshDashboard() {
         // Simple way to refresh: rebuild the center content
         TabPane contentTabs = createContentTabs();
         ((BorderPane) rootLayout.getCenter()).setCenter(contentTabs);
     }
 
+    /**
+     * Displays a limited dashboard for guest users.
+     */
     private void showGuestDashboard() {
         // Create a simple guest view
         VBox guestView = new VBox(20);
@@ -507,6 +573,11 @@ public class StockTradingApp extends Application {
         rootLayout.setCenter(guestView);
     }
 
+    /**
+     * The main entry point for the Java application.
+     *
+     * @param args Command line arguments.
+     */
     public static void main(String[] args) {
         launch(args);
     }
