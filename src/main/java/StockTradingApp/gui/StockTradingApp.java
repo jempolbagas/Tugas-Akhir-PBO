@@ -331,8 +331,8 @@ public class StockTradingApp extends Application {
                 BigDecimal totalValue = akun.getSaldo();
                 try {
                     for (Portfolio p : akun.getPortfolio().values()) {
-                         Saham s = marketService.getSaham(p.getKodeSaham());
-                         totalValue = totalValue.add(p.hitungNilaiSekarang(s.getHargaSekarang()));
+                        Saham s = marketService.getSaham(p.getKodeSaham());
+                        totalValue = totalValue.add(p.hitungNilaiSekarang(s.getHargaSekarang()));
                     }
                 } catch (Exception e) {
                     System.out.println("Error calculating portfolio: " + e.getMessage());
