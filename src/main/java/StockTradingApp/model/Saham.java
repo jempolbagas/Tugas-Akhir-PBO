@@ -63,7 +63,7 @@ public class Saham {
     }
     
     // Update harga dengan random generator
-    public void updateHarga(java.util.Random random) {
+    public synchronized void updateHarga(java.util.Random random) {
         // Perubahan harga antara -5% sampai +5%
         double persentasePerubahanDouble = (random.nextDouble() * 10) - 5; // -5 to +5
         BigDecimal persentasePerubahan = BigDecimal.valueOf(persentasePerubahanDouble).divide(ONE_HUNDRED, 4, RoundingMode.HALF_UP);

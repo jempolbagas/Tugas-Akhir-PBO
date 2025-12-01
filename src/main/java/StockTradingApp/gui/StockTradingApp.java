@@ -438,8 +438,11 @@ public class StockTradingApp extends Application {
         });
 
         // Logic: Market Update Listener
+        // Remove any previously registered listener to prevent accumulation
+        // when this method is called multiple times (e.g., view refresh)
         if (marketListener != null) {
             marketService.removeListener(marketListener);
+            marketListener = null;
         }
 
         marketListener = () -> {
@@ -470,9 +473,7 @@ public class StockTradingApp extends Application {
         List<String> times = saham.getTimeHistory();
 
         for (int i = 0; i < prices.size(); i++) {
-            if (i < times.size()) {
-                series.getData().add(new XYChart.Data<>(times.get(i), prices.get(i)));
-            }
+            series.getData().add(new XYChart.Data<>(times.get(i), prices.get(i)));
         }
     }
 
