@@ -12,12 +12,14 @@ import javafx.scene.control.TextField;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import main.java.StockTradingApp.model.Akun;
+import main.java.StockTradingApp.model.Portfolio;
 import main.java.StockTradingApp.model.Saham;
 import main.java.StockTradingApp.model.TradeResult;
 import main.java.StockTradingApp.service.MarketService;
 import main.java.StockTradingApp.service.TradingService;
 
 import java.math.BigDecimal;
+import java.math.MathContext;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -53,7 +55,7 @@ public class TradeView {
         content.setAlignment(Pos.TOP_CENTER);
 
         Label title = new Label("QUANTUM TRADE INTERFACE");
-        title.setStyle("-fx-font-family: 'Segoe UI'; -fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: linear-gradient(to right, #00ff88, #00ccff);");
+        title.getStyleClass().add("trade-view-title");
 
         HBox tradeContainer = new HBox(30);
         tradeContainer.setAlignment(Pos.CENTER);
@@ -71,31 +73,49 @@ public class TradeView {
     private VBox createTradeSection(String type, String emoji) {
         VBox section = new VBox(15);
         section.setPadding(new Insets(20));
-        section.setStyle("-fx-background-color: rgba(26, 26, 46, 0.6); -fx-border-color: #444477; -fx-border-radius: 12; -fx-background-radius: 12;");
+        section.getStyleClass().add("trade-card");
         section.setAlignment(Pos.CENTER);
         section.setMaxWidth(400);
 
         Label title = new Label(emoji + " QUANTUM " + type);
-        title.setStyle("-fx-font-family: 'Segoe UI'; -fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #00ccff;");
+        title.getStyleClass().add("trade-card-title");
 
         ComboBox<String> stockSelector = new ComboBox<>();
         for (Saham saham : marketService.getAllSaham()) {
             stockSelector.getItems().add(saham.getKode());
         }
         stockSelector.setPromptText("Select Quantum Asset");
-        stockSelector.setStyle("-fx-background-color: #1a1a2e; -fx-border-color: #444477; -fx-border-radius: 4; -fx-background-radius: 4; -fx-text-fill: white;");
+        stockSelector.getStyleClass().add("trade-stock-selector");
 
         TextField quantityField = GUIUtils.createStyledTextField();
         quantityField.setPromptText("Quantity (lots)");
 
+        // Quick Quantity Buttons
+        HBox quickQtyBox = new HBox(10);
+        quickQtyBox.setAlignment(Pos.CENTER);
+        Button btn25 = createQuickQtyButton("25%");
+        Button btn50 = createQuickQtyButton("50%");
+        Button btnMax = createQuickQtyButton("MAX");
+        quickQtyBox.getChildren().addAll(btn25, btn50, btnMax);
+
         Label priceLabel = new Label("Quantum Price: --");
-        priceLabel.setStyle("-fx-font-family: 'Segoe UI'; -fx-text-fill: #8888ff; -fx-font-size: 12px;");
+        priceLabel.getStyleClass().add("price-label");
 
         Label totalLabel = new Label("Total Energy: --");
-        totalLabel.setStyle("-fx-font-family: 'Segoe UI'; -fx-text-fill: #8888ff; -fx-font-size: 12px;");
+        totalLabel.getStyleClass().add("total-label");
 
         Button executeBtn = GUIUtils.createMenuButton("⚡ EXECUTE " + type + " ORDER",
                 type.equals("BUY") ? "success" : "danger");
+
+        // Action for Quick Buttons
+        // We define a helper to calculate MAX lots based on type (BUY/SELL) and selected stock
+        Runnable updateQty = () -> {
+            // Placeholder for updates, depends on which button clicked
+        };
+
+        btn25.setOnAction(e -> applyQuickQuantity(0.25, type, stockSelector.getValue(), quantityField));
+        btn50.setOnAction(e -> applyQuickQuantity(0.50, type, stockSelector.getValue(), quantityField));
+        btnMax.setOnAction(e -> applyQuickQuantity(1.00, type, stockSelector.getValue(), quantityField));
 
         // Update price when stock is selected
         stockSelector.setOnAction(e -> {
@@ -177,8 +197,47 @@ public class TradeView {
             }
         });
 
-        section.getChildren().addAll(title, stockSelector, quantityField, priceLabel, totalLabel, executeBtn);
+        section.getChildren().addAll(title, stockSelector, quantityField, quickQtyBox, priceLabel, totalLabel, executeBtn);
         return section;
+    }
+
+    private Button createQuickQtyButton(String text) {
+        Button btn = new Button(text);
+        btn.getStyleClass().add("quick-qty-button");
+        return btn;
+    }
+
+    private void applyQuickQuantity(double percentage, String type, String stockCode, TextField quantityField) {
+        if (stockCode == null || account == null) return;
+
+        try {
+            int maxLots = 0;
+            if (type.equals("BUY")) {
+                Saham saham = marketService.getSaham(stockCode);
+                BigDecimal price = saham.getHargaSekarang();
+                BigDecimal balance = account.getSaldo();
+
+                // Logic: floor((Balance / Price) / 100)
+                if (price.compareTo(BigDecimal.ZERO) > 0) {
+                    BigDecimal maxShares = balance.divide(price, 0, java.math.RoundingMode.FLOOR);
+                    maxLots = maxShares.divide(BigDecimal.valueOf(100), 0, java.math.RoundingMode.FLOOR).intValue();
+                }
+            } else {
+                // SELL
+                if (account.getPortfolio().containsKey(stockCode)) {
+                    Portfolio portfolio = account.getPortfolio().get(stockCode);
+                    int ownedShares = portfolio.getJumlah();
+                    maxLots = ownedShares / 100;
+                }
+            }
+
+            int targetLots = (int) (maxLots * percentage);
+            quantityField.setText(String.valueOf(targetLots));
+
+        } catch (Exception e) {
+            // Silently fail or log if calculation fails (e.g. stock not found)
+            System.err.println("Error calculating quick quantity: " + e.getMessage());
+        }
     }
 
     private void updateTotalLabel(TextField quantityField, Saham saham, Label totalLabel) {
