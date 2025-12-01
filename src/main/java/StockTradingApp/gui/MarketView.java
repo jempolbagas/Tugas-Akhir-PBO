@@ -1,6 +1,7 @@
 package main.java.StockTradingApp.gui;
 
 import javafx.application.Platform;
+import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.chart.CategoryAxis;
 import javafx.scene.chart.LineChart;
@@ -10,6 +11,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.control.SplitPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import main.java.StockTradingApp.model.Saham;
@@ -46,13 +48,53 @@ public class MarketView {
         ListView<Saham> stockList = new ListView<>();
         stockList.setStyle("-fx-background-color: transparent; -fx-border-color: #444477; -fx-border-radius: 8;");
         stockList.setCellFactory(param -> new ListCell<Saham>() {
+            private final Label lblCode = new Label();
+            private final Label lblName = new Label();
+            private final Label lblPrice = new Label();
+            private final Label lblChange = new Label();
+            private final VBox leftBox = new VBox(5, lblCode, lblName);
+            private final VBox rightBox = new VBox(5, lblPrice, lblChange);
+            private final HBox root = new HBox(10, leftBox, rightBox);
+
+            {
+                // Layout Configuration
+                root.setAlignment(Pos.CENTER_LEFT);
+                HBox.setHgrow(leftBox, Priority.ALWAYS);
+                rightBox.setAlignment(Pos.CENTER_RIGHT);
+
+                // Style Configuration
+                lblCode.setStyle("-fx-text-fill: #00ccff; -fx-font-weight: bold; -fx-font-size: 14px;");
+                lblName.setStyle("-fx-text-fill: #8888ff; -fx-font-size: 10px;");
+                lblPrice.setStyle("-fx-text-fill: white; -fx-font-size: 12px;");
+                lblChange.setStyle("-fx-font-size: 10px;");
+
+                getStyleClass().add("market-list-cell");
+            }
+
             @Override
             protected void updateItem(Saham item, boolean empty) {
                 super.updateItem(item, empty);
                 if (empty || item == null) {
+                    setGraphic(null);
                     setText(null);
                 } else {
-                    setText(item.toString());
+                    lblCode.setText(item.getKode());
+                    lblName.setText(item.getNamaSaham());
+                    lblPrice.setText(String.format("Rp %,.2f", item.getHargaSekarang()));
+
+                    String changeText = item.getPerubahanFormatted();
+                    lblChange.setText(changeText);
+
+                    // Reset classes to avoid accumulation
+                    lblChange.getStyleClass().removeAll("text-positive", "text-negative");
+                    if (item.getPerubahan().compareTo(BigDecimal.ZERO) >= 0) {
+                        lblChange.getStyleClass().add("text-positive");
+                    } else {
+                        lblChange.getStyleClass().add("text-negative");
+                    }
+
+                    setGraphic(root);
+                    setText(null);
                 }
             }
         });
