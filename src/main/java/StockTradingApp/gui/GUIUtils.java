@@ -28,7 +28,7 @@ public class GUIUtils {
             case "danger":
                 return "-fx-background-color: linear-gradient(to right, #ff4444, #ff6666); -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 8; -fx-border-radius: 8; -fx-cursor: hand;";
             case "success":
-                return "-fx-background-color: linear-gradient(to right, #00ff88, #00ccff); -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 8; -fx-border-radius: 8; -fx-cursor: hand;";
+                return "-fx-background-color: linear-gradient(to right, #28a745, #218838); -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 8; -fx-border-radius: 8; -fx-cursor: hand;";
             default:
                 return "-fx-background-color: #444477; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 8; -fx-border-radius: 8; -fx-cursor: hand;";
         }

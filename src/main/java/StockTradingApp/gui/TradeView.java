@@ -1,5 +1,6 @@
 package main.java.StockTradingApp.gui;
 
+import javafx.beans.value.ChangeListener;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
@@ -17,12 +18,27 @@ import main.java.StockTradingApp.service.MarketService;
 import main.java.StockTradingApp.service.TradingService;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 
 public class TradeView {
     private final Akun account;
     private final MarketService marketService;
     private final TradingService tradingService;
     private final Runnable onTradeSuccess;
+    
+    // Track listeners and their associated TextFields for cleanup
+    private final List<ListenerBinding> listenerBindings = new ArrayList<>();
+    
+    private static class ListenerBinding {
+        final TextField textField;
+        final ChangeListener<String> listener;
+        
+        ListenerBinding(TextField textField, ChangeListener<String> listener) {
+            this.textField = textField;
+            this.listener = listener;
+        }
+    }
 
     public TradeView(Akun account, MarketService marketService, TradingService tradingService, Runnable onTradeSuccess) {
         this.account = account;
@@ -96,7 +112,7 @@ public class TradeView {
         });
 
         // Update total when quantity changes
-        quantityField.textProperty().addListener((observable, oldValue, newValue) -> {
+        ChangeListener<String> quantityListener = (observable, oldValue, newValue) -> {
             String selected = stockSelector.getValue();
             if (selected != null && !newValue.isEmpty()) {
                 try {
@@ -108,7 +124,9 @@ public class TradeView {
             } else {
                 totalLabel.setText("Total Energy: --");
             }
-        });
+        };
+        quantityField.textProperty().addListener(quantityListener);
+        listenerBindings.add(new ListenerBinding(quantityField, quantityListener));
 
         executeBtn.setOnAction(e -> {
             if (account == null) {
@@ -144,15 +162,6 @@ public class TradeView {
                     priceLabel.setText("Quantum Price: --");
                     totalLabel.setText("Total Energy: --");
 
-                    // Notify success (Account is updated in result, but we use shared account object mainly.
-                    // result.getUpdatedAccount() might be useful if the reference changed, but typically it mutates.)
-                    // TradingService returns result with updated account.
-                    // The caller (StockTradingApp) needs to update its 'akunAktif' reference if it changed?
-                    // In TradingService:
-                    // akun.beliSaham(...) -> modifies akun.
-                    // return new TradeResult(..., akun);
-                    // So the object is mutated.
-
                     if (onTradeSuccess != null) {
                         onTradeSuccess.run();
                     }
@@ -181,5 +190,13 @@ public class TradeView {
         } catch (NumberFormatException e) {
             totalLabel.setText("Total Energy: --");
         }
+    }
+
+    public void dispose() {
+        // Remove all registered listeners
+        for (ListenerBinding binding : listenerBindings) {
+            binding.textField.textProperty().removeListener(binding.listener);
+        }
+        listenerBindings.clear();
     }
 }
