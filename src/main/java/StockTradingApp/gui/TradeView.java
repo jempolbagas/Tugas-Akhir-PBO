@@ -19,7 +19,6 @@ import main.java.StockTradingApp.service.MarketService;
 import main.java.StockTradingApp.service.TradingService;
 
 import java.math.BigDecimal;
-import java.math.MathContext;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -106,12 +105,6 @@ public class TradeView {
 
         Button executeBtn = GUIUtils.createMenuButton("⚡ EXECUTE " + type + " ORDER",
                 type.equals("BUY") ? "success" : "danger");
-
-        // Action for Quick Buttons
-        // We define a helper to calculate MAX lots based on type (BUY/SELL) and selected stock
-        Runnable updateQty = () -> {
-            // Placeholder for updates, depends on which button clicked
-        };
 
         btn25.setOnAction(e -> applyQuickQuantity(0.25, type, stockSelector.getValue(), quantityField));
         btn50.setOnAction(e -> applyQuickQuantity(0.50, type, stockSelector.getValue(), quantityField));
@@ -219,7 +212,7 @@ public class TradeView {
 
                 // Logic: floor((Balance / Price) / 100)
                 if (price.compareTo(BigDecimal.ZERO) > 0) {
-                    BigDecimal maxShares = balance.divide(price, 0, java.math.RoundingMode.FLOOR);
+                    BigDecimal maxShares = balance.divide(price, 2, java.math.RoundingMode.FLOOR);
                     maxLots = maxShares.divide(BigDecimal.valueOf(100), 0, java.math.RoundingMode.FLOOR).intValue();
                 }
             } else {
