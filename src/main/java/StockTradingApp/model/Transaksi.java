@@ -34,10 +34,13 @@ public class Transaksi {
         this.waktu = java.time.LocalDateTime.now();
     }
     
+    public String getIdTransaksi() { return idTransaksi; }
     public String getJenis() { return jenis; }
     public String getKodeSaham() { return kodeSaham; }
     public BigDecimal getTotal() { return total; }
     public int getJumlah() { return jumlah; }
+    public BigDecimal getHarga() { return harga; }
+    public java.time.LocalDateTime getWaktu() { return waktu; }
     
     @Override
     public String toString() {

@@ -546,3 +546,14 @@
     -fx-font-weight: bold;
     -fx-text-fill: white;
 }
+
+/* Conditional Table Cell Styles */
+.table-cell-positive {
+    -fx-text-fill: #00ff88;
+    -fx-font-weight: bold;
+}
+
+.table-cell-negative {
+    -fx-text-fill: #ff4444;
+    -fx-font-weight: bold;
+}
