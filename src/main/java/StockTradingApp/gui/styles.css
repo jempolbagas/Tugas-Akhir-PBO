@@ -444,7 +444,7 @@
     -fx-font-family: 'Segoe UI';
     -fx-font-size: 20px;
     -fx-font-weight: bold;
-    -fx-text-fill: linear-gradient(to right, #00ff88, #00ccff);
+    -fx-text-fill: #00ccff;
 }
 
 .trade-card {
