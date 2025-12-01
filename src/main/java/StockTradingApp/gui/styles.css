@@ -439,6 +439,30 @@
     -fx-font-family: 'Segoe UI', sans-serif;
 }
 
+/* Market List Cell Customization */
+.market-list-cell {
+    -fx-padding: 10;
+    -fx-background-color: transparent;
+    -fx-border-color: transparent transparent #444477 transparent;
+    -fx-border-width: 0 0 1 0;
+}
+
+.market-list-cell:empty {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+}
+
+.market-list-cell:filled:hover {
+    -fx-background-color: rgba(0, 255, 136, 0.1);
+    -fx-cursor: hand;
+}
+
+.market-list-cell:filled:selected, .market-list-cell:filled:selected:hover {
+    -fx-background-color: rgba(0, 255, 136, 0.2);
+    -fx-border-color: #00ff88;
+    -fx-border-width: 1; /* Full border for selected item */
+    -fx-border-radius: 4;
+    -fx-background-radius: 4;
 /* Trade View Styles */
 .trade-view-title {
     -fx-font-family: 'Segoe UI';
